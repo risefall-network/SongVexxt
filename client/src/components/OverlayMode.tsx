@@ -6,11 +6,11 @@ import RhymeSuggestions from "./RhymeSuggestions";
 export default function OverlayMode() {
   const [textContent, setTextContent] = useState("I love you with all my heart");
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [lastWord, setLastWord] = useState("");
+  const [rhymeWords, setRhymeWords] = useState<{word: string, lineNumber: number}[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
-  // Helper function to extract the last word from text
+  // Helper function to extract the last word from a line
   const extractLastWord = (text: string): string => {
     const words = text.trim().split(/\s+/);
     if (words.length === 0) return "";
@@ -20,16 +20,41 @@ export default function OverlayMode() {
     return lastWord.toLowerCase();
   };
 
+  // Helper function to get rhyme words from previous lines
+  const getPreviousLineWords = (text: string): {word: string, lineNumber: number}[] => {
+    const lines = text.split('\n');
+    const currentLineIndex = lines.length - 1;
+    const rhymeWords: {word: string, lineNumber: number}[] = [];
+    
+    // Get last word from previous line (line before current)
+    if (currentLineIndex >= 1) {
+      const prevLineWord = extractLastWord(lines[currentLineIndex - 1]);
+      if (prevLineWord && prevLineWord.length > 2) {
+        rhymeWords.push({word: prevLineWord, lineNumber: currentLineIndex - 1});
+      }
+    }
+    
+    // Get last word from line before that (two lines back)
+    if (currentLineIndex >= 2) {
+      const prevPrevLineWord = extractLastWord(lines[currentLineIndex - 2]);
+      if (prevPrevLineWord && prevPrevLineWord.length > 2) {
+        rhymeWords.push({word: prevPrevLineWord, lineNumber: currentLineIndex - 2});
+      }
+    }
+    
+    return rhymeWords;
+  };
+
   useEffect(() => {
     const text = textContent.trim();
     clearTimeout(timeoutRef.current);
     
     if (text.length > 0) {
-      const currentLastWord = extractLastWord(text);
+      const previousWords = getPreviousLineWords(text);
       
-      if (currentLastWord && currentLastWord.length > 2) {
+      if (previousWords.length > 0) {
         timeoutRef.current = setTimeout(() => {
-          setLastWord(currentLastWord);
+          setRhymeWords(previousWords);
           setShowSuggestions(true);
         }, 500);
       } else {
@@ -77,7 +102,7 @@ export default function OverlayMode() {
             />
             
             <RhymeSuggestions 
-              word={lastWord}
+              words={rhymeWords}
               show={showSuggestions}
               onSelect={handleRhymeSelect}
               onClose={() => setShowSuggestions(false)}
