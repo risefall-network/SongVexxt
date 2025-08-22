@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { WandSparkles, Book } from "lucide-react";
 import RhymeSuggestions from "./RhymeSuggestions";
-import { extractLastWord } from "../../../server/services/rhymeService";
 
 export default function OverlayMode() {
   const [textContent, setTextContent] = useState("I love you with all my heart");
@@ -11,15 +10,31 @@ export default function OverlayMode() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
+  // Helper function to extract the last word from text
+  const extractLastWord = (text: string): string => {
+    const words = text.trim().split(/\s+/);
+    if (words.length === 0) return "";
+    
+    // Remove punctuation from the last word
+    const lastWord = words[words.length - 1].replace(/[.,!?;:'"()]/g, "");
+    return lastWord.toLowerCase();
+  };
+
   useEffect(() => {
-    const text = textContent.toLowerCase();
+    const text = textContent.trim();
     clearTimeout(timeoutRef.current);
     
-    if (text.includes('heart')) {
-      timeoutRef.current = setTimeout(() => {
-        setLastWord("heart");
-        setShowSuggestions(true);
-      }, 500);
+    if (text.length > 0) {
+      const currentLastWord = extractLastWord(text);
+      
+      if (currentLastWord && currentLastWord.length > 2) {
+        timeoutRef.current = setTimeout(() => {
+          setLastWord(currentLastWord);
+          setShowSuggestions(true);
+        }, 500);
+      } else {
+        setShowSuggestions(false);
+      }
     } else {
       setShowSuggestions(false);
     }
@@ -47,7 +62,7 @@ export default function OverlayMode() {
               ref={textareaRef}
               value={textContent}
               onChange={handleTextChange}
-              placeholder="Start writing your lyrics here... Type 'heart' to see rhyme suggestions appear!"
+              placeholder="Start writing your lyrics here... Rhyme suggestions will appear as you type!"
               className="w-full h-32 bg-cyber-purple/30 border border-neon-blue/30 rounded-lg p-4 text-white placeholder-gray-400 focus:border-neon-blue focus:outline-none font-mono resize-none"
               data-testid="textarea-lyrics"
             />
