@@ -1,12 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { WandSparkles, Book } from "lucide-react";
+import { WandSparkles, Book, X } from "lucide-react";
 import RhymeSuggestions from "./RhymeSuggestions";
+import Dictionary from "./Dictionary";
+import AIAssistant from "./AIAssistant";
 
 export default function OverlayMode() {
   const [textContent, setTextContent] = useState("I love you with all my heart");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [rhymeWords, setRhymeWords] = useState<{word: string, lineNumber: number}[]>([]);
+  const [currentSection, setCurrentSection] = useState("Verse 1");
+  const [showDictionary, setShowDictionary] = useState(false);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
@@ -87,9 +92,14 @@ export default function OverlayMode() {
     <div className="relative h-full" data-testid="overlay-mode">
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl px-4">
         <div className="glass-effect rounded-xl p-6 neon-border">
-          <h3 className="font-cyber text-lg mb-4 text-neon-blue" data-testid="text-overlay-title">
-            Write in any text field - SongVexxt will help!
-          </h3>
+          <div className="mb-4">
+            <h3 className="font-cyber text-lg text-neon-blue" data-testid="text-overlay-title">
+              Write in any text field - SongVexxt will help!
+            </h3>
+            <div className="text-sm text-gray-400 mt-1" data-testid="text-current-section">
+              Currently writing: <span className="text-neon-cyan">{currentSection}</span>
+            </div>
+          </div>
           
           <div className="relative">
             <textarea 
@@ -112,14 +122,16 @@ export default function OverlayMode() {
           <div className="flex items-center justify-between mt-4">
             <div className="flex space-x-2">
               <Button 
-                className="cyber-button px-3 py-1 rounded text-xs"
+                onClick={() => setShowAIAssistant(!showAIAssistant)}
+                className={`cyber-button px-3 py-1 rounded text-xs ${showAIAssistant ? 'bg-neon-purple/30 border-neon-purple' : ''}`}
                 data-testid="button-ai-assist"
               >
                 <WandSparkles className="w-3 h-3 mr-1" />
                 AI Assist
               </Button>
               <Button 
-                className="cyber-button px-3 py-1 rounded text-xs"
+                onClick={() => setShowDictionary(!showDictionary)}
+                className={`cyber-button px-3 py-1 rounded text-xs ${showDictionary ? 'bg-neon-blue/30 border-neon-blue' : ''}`}
                 data-testid="button-dictionary"
               >
                 <Book className="w-3 h-3 mr-1" />
@@ -140,6 +152,38 @@ export default function OverlayMode() {
           <span className="text-xs font-cyber">Active</span>
         </div>
       </div>
+
+      {/* AI Assistant Panel */}
+      {showAIAssistant && (
+        <div className="fixed top-4 right-4 z-30">
+          <div className="relative">
+            <Button
+              onClick={() => setShowAIAssistant(false)}
+              className="absolute -top-2 -right-2 cyber-button p-1 rounded-full z-40"
+              data-testid="button-close-ai"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+            <AIAssistant lyrics={textContent} section={currentSection} />
+          </div>
+        </div>
+      )}
+
+      {/* Dictionary Panel */}
+      {showDictionary && (
+        <div className="fixed top-4 left-4 z-30">
+          <div className="relative">
+            <Button
+              onClick={() => setShowDictionary(false)}
+              className="absolute -top-2 -right-2 cyber-button p-1 rounded-full z-40"
+              data-testid="button-close-dictionary"
+            >
+              <X className="w-4 h-4" />
+            </Button>
+            <Dictionary />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

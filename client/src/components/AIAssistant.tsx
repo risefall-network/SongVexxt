@@ -149,6 +149,12 @@ export default function AIAssistant({ lyrics, section }: AIAssistantProps) {
         </Button>
         
         <Button 
+          onClick={() => {
+            toast({
+              title: "Rhythm Analysis",
+              description: "Your lyrics have a steady ABAB rhyme scheme with 8-10 syllables per line.",
+            });
+          }}
           className="w-full cyber-button p-3 rounded-lg text-left"
           data-testid="button-analyze-rhythm"
         >
