@@ -45,7 +45,16 @@ export default function OverlayMode() {
   };
 
   const handleRhymeSelect = (word: string) => {
-    setTextContent(prev => prev + '\nIt was meant to be a new ' + word);
+    setTextContent(prev => {
+      const words = prev.trim().split(/\s+/);
+      if (words.length === 0) {
+        return word;
+      }
+      
+      // Replace the last word with the selected rhyme
+      words[words.length - 1] = word;
+      return words.join(' ');
+    });
     setShowSuggestions(false);
   };
 
