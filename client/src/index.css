@@ -1,0 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(267, 57%, 4%);
+  --foreground: hsl(0, 0%, 100%);
+  --card: hsl(267, 57%, 8%);
+  --card-foreground: hsl(0, 0%, 100%);
+  --popover: hsl(267, 57%, 6%);
+  --popover-foreground: hsl(0, 0%, 100%);
+  --primary: hsl(190, 100%, 50%);
+  --primary-foreground: hsl(267, 57%, 4%);
+  --secondary: hsl(267, 57%, 12%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(267, 40%, 15%);
+  --muted-foreground: hsl(0, 0%, 70%);
+  --accent: hsl(267, 40%, 20%);
+  --accent-foreground: hsl(190, 100%, 50%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(190, 100%, 50%, 0.2);
+  --input: hsl(267, 40%, 15%);
+  --ring: hsl(190, 100%, 50%);
+  --chart-1: hsl(190, 100%, 50%);
+  --chart-2: hsl(301, 100%, 50%);
+  --chart-3: hsl(180, 100%, 50%);
+  --chart-4: hsl(320, 100%, 50%);
+  --chart-5: hsl(260, 100%, 50%);
+  --sidebar: hsl(267, 57%, 8%);
+  --sidebar-foreground: hsl(0, 0%, 100%);
+  --sidebar-primary: hsl(190, 100%, 50%);
+  --sidebar-primary-foreground: hsl(267, 57%, 4%);
+  --sidebar-accent: hsl(267, 40%, 20%);
+  --sidebar-accent-foreground: hsl(190, 100%, 50%);
+  --sidebar-border: hsl(190, 100%, 50%, 0.2);
+  --sidebar-ring: hsl(190, 100%, 50%);
+  --font-cyber: 'Orbitron', monospace;
+  --font-body: 'Exo 2', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --radius: 0.75rem;
+  
+  /* Cyberpunk specific colors */
+  --cyber-dark: hsl(267, 57%, 4%);
+  --cyber-purple: hsl(267, 57%, 8%);
+  --cyber-purple-light: hsl(267, 40%, 20%);
+  --cyber-blue: hsl(210, 50%, 8%);
+  --cyber-blue-light: hsl(210, 40%, 25%);
+  --neon-blue: hsl(190, 100%, 50%);
+  --neon-cyan: hsl(180, 100%, 50%);
+  --neon-purple: hsl(301, 100%, 50%);
+  --neon-pink: hsl(320, 100%, 50%);
+}
+
+.dark {
+  --background: hsl(267, 57%, 4%);
+  --foreground: hsl(0, 0%, 100%);
+  --card: hsl(267, 57%, 8%);
+  --card-foreground: hsl(0, 0%, 100%);
+  --popover: hsl(267, 57%, 6%);
+  --popover-foreground: hsl(0, 0%, 100%);
+  --primary: hsl(190, 100%, 50%);
+  --primary-foreground: hsl(267, 57%, 4%);
+  --secondary: hsl(267, 57%, 12%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(267, 40%, 15%);
+  --muted-foreground: hsl(0, 0%, 70%);
+  --accent: hsl(267, 40%, 20%);
+  --accent-foreground: hsl(190, 100%, 50%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(190, 100%, 50%, 0.2);
+  --input: hsl(267, 40%, 15%);
+  --ring: hsl(190, 100%, 50%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-body antialiased bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+}
+
+@layer utilities {
+  .font-cyber {
+    font-family: var(--font-cyber);
+  }
+  
+  .font-body {
+    font-family: var(--font-body);
+  }
+  
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 10px hsl(var(--neon-blue) / 0.6);
+  }
+  
+  .glass-effect {
+    background: hsla(267, 57%, 8%, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid hsl(var(--neon-blue) / 0.2);
+  }
+  
+  .neon-border {
+    border: 1px solid hsl(var(--neon-blue));
+    box-shadow: 0 0 10px hsl(var(--neon-blue) / 0.3);
+  }
+  
+  .cyber-button {
+    background: linear-gradient(45deg, hsla(267, 57%, 8%, 0.8), hsla(267, 40%, 20%, 0.8));
+    border: 1px solid hsl(var(--neon-blue));
+    transition: all 0.3s ease;
+  }
+  
+  .cyber-button:hover {
+    box-shadow: 0 0 20px hsl(var(--neon-blue) / 0.6);
+    transform: translateY(-2px);
+  }
+  
+  .cyber-grid {
+    background-image: 
+      linear-gradient(hsl(var(--neon-blue) / 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--neon-blue) / 0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background: hsla(267, 57%, 8%, 0.3);
+  }
+  
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, hsl(var(--neon-blue)), hsl(var(--neon-purple)));
+    border-radius: 4px;
+  }
+}
+
+@keyframes pulse-neon {
+  from { 
+    box-shadow: 0 0 20px hsl(var(--neon-blue) / 0.3); 
+  }
+  to { 
+    box-shadow: 0 0 30px hsl(var(--neon-blue) / 0.7); 
+  }
+}
+
+@keyframes glow {
+  from { 
+    text-shadow: 0 0 10px hsl(var(--neon-blue) / 0.5); 
+  }
+  to { 
+    text-shadow: 0 0 20px hsl(var(--neon-blue) / 0.8); 
+  }
+}
+
+@keyframes slide-up {
+  from { 
+    transform: translateY(20px); 
+    opacity: 0; 
+  }
+  to { 
+    transform: translateY(0); 
+    opacity: 1; 
+  }
+}
+
+@keyframes fade-in {
+  from { 
+    opacity: 0; 
+  }
+  to { 
+    opacity: 1; 
+  }
+}
+
+.animate-pulse-neon {
+  animation: pulse-neon 2s ease-in-out infinite alternate;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out;
+}
