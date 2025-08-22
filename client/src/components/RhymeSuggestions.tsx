@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Lightbulb } from "lucide-react";
 
@@ -10,14 +10,19 @@ interface RhymeSuggestionsProps {
 }
 
 export default function RhymeSuggestions({ words, show, onSelect, onClose }: RhymeSuggestionsProps) {
-  // Create queries for each word
-  const rhymeQueries = words.map(({word}) => {
-    const { data: rhymes = [], isLoading } = useQuery<string[]>({
+  // Create queries for each word using useQueries
+  const rhymeQueries = useQueries({
+    queries: words.map(({word}) => ({
       queryKey: ["/api/rhymes", word],
       enabled: !!word && show,
-    });
-    return { word, rhymes: rhymes as string[], isLoading };
+    }))
   });
+
+  const rhymeData = words.map(({word}, index) => ({
+    word,
+    rhymes: (rhymeQueries[index]?.data || []) as string[],
+    isLoading: rhymeQueries[index]?.isLoading || false
+  }));
 
   if (!show || words.length === 0) {
     return null;
@@ -28,7 +33,7 @@ export default function RhymeSuggestions({ words, show, onSelect, onClose }: Rhy
       className="absolute top-full left-0 mt-2 w-full glass-effect rounded-lg p-4 border border-neon-blue/30 animate-slide-up z-20"
       data-testid="panel-rhyme-suggestions"
     >
-      {rhymeQueries.map(({word, rhymes, isLoading}, index) => {
+      {rhymeData.map(({word, rhymes, isLoading}, index) => {
         const fallbackRhymes = ["start", "part", "art", "smart", "chart", "dart"];
         const displayRhymes = rhymes.length > 0 ? rhymes : fallbackRhymes;
         
