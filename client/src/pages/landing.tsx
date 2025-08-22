@@ -36,6 +36,9 @@ export default function Landing() {
             
             <Button 
               variant="outline" 
+              onClick={() => {
+                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+              }}
               className="border-neon-blue text-neon-blue hover:bg-neon-blue hover:text-cyber-dark px-8 py-4 text-lg"
               data-testid="button-learn-more"
             >
@@ -44,7 +47,7 @@ export default function Landing() {
           </div>
           
           {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div id="features" className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             <Card className="glass-effect border-neon-blue/30 hover:border-neon-blue/60 transition-colors" data-testid="card-feature-overlay">
               <CardHeader>
                 <div className="w-12 h-12 bg-gradient-to-r from-neon-blue to-neon-cyan rounded-lg flex items-center justify-center mb-4">

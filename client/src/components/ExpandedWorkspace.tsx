@@ -18,6 +18,8 @@ export default function ExpandedWorkspace() {
   const [lyrics, setLyrics] = useState("I love you with all my heart\nNothing can tear us apart\nYou're my light, you're my art\nA perfect work from the start");
   const [projectTitle, setProjectTitle] = useState("Untitled Song");
   const [currentSection, setCurrentSection] = useState("Chorus");
+  const [showDictionaryPanel, setShowDictionaryPanel] = useState(false);
+  const [showAIPanel, setShowAIPanel] = useState(false);
 
   // Get active project
   const { data: activeProject, isLoading: projectLoading } = useQuery({
@@ -177,15 +179,27 @@ export default function ExpandedWorkspace() {
         <div className="glass-effect border-b border-neon-blue/20 p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <Button className="cyber-button px-4 py-2 rounded-lg" data-testid="button-ai-assist-toolbar">
+              <Button 
+                onClick={() => setShowAIPanel(!showAIPanel)}
+                className={`cyber-button px-4 py-2 rounded-lg ${showAIPanel ? 'bg-neon-purple/30 border-neon-purple' : ''}`} 
+                data-testid="button-ai-assist-toolbar"
+              >
                 <WandSparkles className="w-4 h-4 mr-2" />
                 AI Assist
               </Button>
-              <Button className="cyber-button px-4 py-2 rounded-lg" data-testid="button-dictionary-toolbar">
+              <Button 
+                onClick={() => setShowDictionaryPanel(!showDictionaryPanel)}
+                className={`cyber-button px-4 py-2 rounded-lg ${showDictionaryPanel ? 'bg-neon-blue/30 border-neon-blue' : ''}`} 
+                data-testid="button-dictionary-toolbar"
+              >
                 <Book className="w-4 h-4 mr-2" />
                 Dictionary
               </Button>
-              <Button className="cyber-button px-4 py-2 rounded-lg" data-testid="button-thesaurus">
+              <Button 
+                onClick={() => setShowDictionaryPanel(!showDictionaryPanel)}
+                className={`cyber-button px-4 py-2 rounded-lg ${showDictionaryPanel ? 'bg-neon-cyan/30 border-neon-cyan' : ''}`} 
+                data-testid="button-thesaurus"
+              >
                 <Search className="w-4 h-4 mr-2" />
                 Thesaurus
               </Button>
@@ -235,13 +249,13 @@ export default function ExpandedWorkspace() {
             </div>
 
             {/* AI Assistant Panel */}
-            <AIAssistant lyrics={lyrics} section={currentSection} />
+            {showAIPanel && <AIAssistant lyrics={lyrics} section={currentSection} />}
           </div>
         </div>
       </div>
 
       {/* Right Panel - Dictionary & Thesaurus */}
-      <Dictionary />
+      {showDictionaryPanel && <Dictionary />}
     </div>
   );
 }
