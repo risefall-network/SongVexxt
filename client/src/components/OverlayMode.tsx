@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { WandSparkles, Book, X } from "lucide-react";
+import { WandSparkles, Book, X, Share2 } from "lucide-react";
 import RhymeSuggestions from "./RhymeSuggestions";
 import Dictionary from "./Dictionary";
 import AIAssistant from "./AIAssistant";
+import SocialShare from "./SocialShare";
 
 export default function OverlayMode() {
   const [textContent, setTextContent] = useState("I love you with all my heart");
@@ -166,6 +167,16 @@ export default function OverlayMode() {
                 <Book className="w-3 h-3 mr-1" />
                 Dictionary
               </Button>
+              <SocialShare 
+                lyrics={textContent}
+                songTitle="My Song"
+                currentSection={currentSection}
+              >
+                <Button className="cyber-button px-3 py-1 rounded text-xs">
+                  <Share2 className="w-3 h-3 mr-1" />
+                  Share
+                </Button>
+              </SocialShare>
             </div>
             <div className="text-xs text-gray-400" data-testid="text-status">
               SongVexxt is watching for rhyme opportunities...
