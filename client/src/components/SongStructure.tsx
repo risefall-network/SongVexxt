@@ -40,7 +40,7 @@ export default function SongStructure({ currentSection, onSectionChange }: SongS
             >
               <div className="flex items-center justify-between">
                 <span className={`text-sm font-medium ${
-                  section.featured ? 'text-neon-cyan' : 'text-white'
+                  section.featured ? 'text-neon-cyan' : 'text-neon-gold'
                 }`}>
                   {section.name}
                 </span>
@@ -50,7 +50,7 @@ export default function SongStructure({ currentSection, onSectionChange }: SongS
                   <ChevronRight className="w-4 h-4 text-neon-blue" />
                 )}
               </div>
-              <div className="text-xs text-gray-400 mt-1">{section.description}</div>
+              <div className="text-xs text-neon-gold/70 mt-1">{section.description}</div>
             </Button>
           ))}
         </div>
@@ -71,7 +71,7 @@ export default function SongStructure({ currentSection, onSectionChange }: SongS
                 <Youtube className="w-5 h-5 text-red-400" />
                 <div>
                   <div className="text-sm">{tutorial.title}</div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-neon-gold/70">
                     {tutorial.duration} • {tutorial.views} views
                   </div>
                 </div>

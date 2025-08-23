@@ -125,7 +125,7 @@ export default function RhymeSuggestions({ words, show, onSelect, onClose, onClo
             </div>
             
             {isLoading ? (
-              <div className="text-sm text-gray-400">Loading rhymes...</div>
+              <div className="text-sm text-neon-gold/70">Loading rhymes...</div>
             ) : (
               <>
                 <div className="flex flex-wrap gap-2">
@@ -159,7 +159,7 @@ export default function RhymeSuggestions({ words, show, onSelect, onClose, onClo
         );
       })}
       
-      <div className="mt-3 text-xs text-gray-400 flex items-center" data-testid="text-rhyme-hint">
+      <div className="mt-3 text-xs text-neon-gold/70 flex items-center" data-testid="text-rhyme-hint">
         <Lightbulb className="w-3 h-3 text-neon-blue mr-1" />
         Click any word to insert it into your text
       </div>

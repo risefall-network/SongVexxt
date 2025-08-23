@@ -96,7 +96,7 @@ export default function AIAssistant({ lyrics, section }: AIAssistantProps) {
       <div className="space-y-3 mb-6">
         <div className="bg-cyber-purple/30 rounded-lg p-3 border border-neon-purple/30">
           <div className="text-sm text-neon-purple mb-2">Next Line Suggestion:</div>
-          <div className="text-sm text-gray-300" data-testid="text-next-line-suggestion">
+          <div className="text-sm text-neon-gold/80" data-testid="text-next-line-suggestion">
             "{suggestions.nextLine}"
           </div>
           <Button 

@@ -24,11 +24,11 @@ export default function TopNavigation({ isExpanded, onToggleMode }: TopNavigatio
           <div className="animate-pulse-neon">
             <Music className="text-neon-blue text-2xl w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-cyber font-bold text-glow" data-testid="text-app-title">
+          <h1 className="text-2xl font-cyber font-bold text-neon-gold text-glow" data-testid="text-app-title">
             SongVexxt
           </h1>
         </div>
-        <div className="text-sm text-neon-blue/70" data-testid="text-app-subtitle">
+        <div className="text-sm text-neon-gold/70" data-testid="text-app-subtitle">
           AI Songwriting Assistant
         </div>
       </div>

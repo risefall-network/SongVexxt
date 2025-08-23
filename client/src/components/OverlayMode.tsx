@@ -133,7 +133,7 @@ export default function OverlayMode() {
             <h3 className="font-cyber text-lg text-neon-blue" data-testid="text-overlay-title">
               Write in any text field - SongVexxt will help!
             </h3>
-            <div className="text-sm text-gray-400 mt-1" data-testid="text-current-section">
+            <div className="text-sm text-neon-gold/70 mt-1" data-testid="text-current-section">
               Currently writing: <span className="text-neon-cyan">{currentSection}</span>
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function OverlayMode() {
               value={textContent}
               onChange={handleTextChange}
               placeholder="Start writing your lyrics here... Rhyme suggestions will appear as you type!"
-              className="w-full h-32 bg-cyber-purple/30 border border-neon-blue/30 rounded-lg p-4 text-white placeholder-gray-400 focus:border-neon-blue focus:outline-none font-mono resize-none"
+              className="w-full h-32 bg-cyber-purple/30 border border-neon-blue/30 rounded-lg p-4 text-neon-gold placeholder-neon-gold/40 focus:border-neon-blue focus:outline-none font-mono resize-none"
               data-testid="textarea-lyrics"
             />
             
@@ -186,7 +186,7 @@ export default function OverlayMode() {
                 </Button>
               </SocialShare>
             </div>
-            <div className="text-xs text-gray-400" data-testid="text-status">
+            <div className="text-xs text-neon-gold/70" data-testid="text-status">
               SongVexxt is watching for rhyme opportunities...
             </div>
           </div>
