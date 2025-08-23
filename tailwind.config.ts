@@ -71,6 +71,7 @@ export default {
         'neon-cyan': 'hsl(var(--neon-cyan))',
         'neon-purple': 'hsl(var(--neon-purple))',
         'neon-pink': 'hsl(var(--neon-pink))',
+        'neon-gold': 'hsl(var(--neon-gold))',
       },
       fontFamily: {
         cyber: ['var(--font-cyber)'],

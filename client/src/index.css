@@ -5,21 +5,21 @@
 
 :root {
   --background: hsl(240, 100%, 2%);
-  --foreground: hsl(0, 0%, 100%);
+  --foreground: hsl(45, 100%, 75%);
   --card: hsl(250, 100%, 6%);
-  --card-foreground: hsl(0, 0%, 100%);
+  --card-foreground: hsl(45, 100%, 75%);
   --popover: hsl(240, 100%, 4%);
-  --popover-foreground: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(45, 100%, 75%);
   --primary: hsl(195, 100%, 65%);
   --primary-foreground: hsl(240, 100%, 2%);
   --secondary: hsl(280, 100%, 12%);
-  --secondary-foreground: hsl(0, 0%, 100%);
+  --secondary-foreground: hsl(45, 100%, 75%);
   --muted: hsl(260, 80%, 8%);
-  --muted-foreground: hsl(300, 60%, 80%);
+  --muted-foreground: hsl(45, 90%, 65%);
   --accent: hsl(320, 100%, 50%);
   --accent-foreground: hsl(240, 100%, 2%);
   --destructive: hsl(0, 84%, 60%);
-  --destructive-foreground: hsl(0, 0%, 100%);
+  --destructive-foreground: hsl(45, 100%, 75%);
   --border: hsl(195, 100%, 65%, 0.3);
   --input: hsl(260, 80%, 8%);
   --ring: hsl(195, 100%, 65%);
@@ -29,11 +29,11 @@
   --chart-4: hsl(200, 100%, 70%);
   --chart-5: hsl(260, 100%, 70%);
   --sidebar: hsl(250, 100%, 6%);
-  --sidebar-foreground: hsl(0, 0%, 100%);
+  --sidebar-foreground: hsl(45, 100%, 75%);
   --sidebar-primary: hsl(195, 100%, 65%);
   --sidebar-primary-foreground: hsl(240, 100%, 2%);
   --sidebar-accent: hsl(320, 100%, 50%);
-  --sidebar-accent-foreground: hsl(0, 0%, 100%);
+  --sidebar-accent-foreground: hsl(45, 100%, 75%);
   --sidebar-border: hsl(195, 100%, 65%, 0.3);
   --sidebar-ring: hsl(195, 100%, 65%);
   --font-cyber: 'Orbitron', monospace;
@@ -51,25 +51,26 @@
   --neon-cyan: hsl(185, 100%, 70%);
   --neon-purple: hsl(270, 100%, 70%);
   --neon-pink: hsl(320, 100%, 70%);
+  --neon-gold: hsl(45, 100%, 75%);
 }
 
 .dark {
   --background: hsl(240, 100%, 2%);
-  --foreground: hsl(0, 0%, 100%);
+  --foreground: hsl(45, 100%, 75%);
   --card: hsl(250, 100%, 6%);
-  --card-foreground: hsl(0, 0%, 100%);
+  --card-foreground: hsl(45, 100%, 75%);
   --popover: hsl(240, 100%, 4%);
-  --popover-foreground: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(45, 100%, 75%);
   --primary: hsl(195, 100%, 65%);
   --primary-foreground: hsl(240, 100%, 2%);
   --secondary: hsl(280, 100%, 12%);
-  --secondary-foreground: hsl(0, 0%, 100%);
+  --secondary-foreground: hsl(45, 100%, 75%);
   --muted: hsl(260, 80%, 8%);
-  --muted-foreground: hsl(300, 60%, 80%);
+  --muted-foreground: hsl(45, 90%, 65%);
   --accent: hsl(320, 100%, 50%);
   --accent-foreground: hsl(240, 100%, 2%);
   --destructive: hsl(0, 84%, 60%);
-  --destructive-foreground: hsl(0, 0%, 100%);
+  --destructive-foreground: hsl(45, 100%, 75%);
   --border: hsl(195, 100%, 65%, 0.3);
   --input: hsl(260, 80%, 8%);
   --ring: hsl(195, 100%, 65%);
@@ -247,6 +248,11 @@
 .text-neon-cyan {
   color: hsl(var(--neon-cyan));
   text-shadow: 0 0 10px hsl(var(--neon-cyan) / 0.5);
+}
+
+.text-neon-gold {
+  color: hsl(var(--neon-gold));
+  text-shadow: 0 0 10px hsl(var(--neon-gold) / 0.5);
 }
 
 .bg-cyber-gradient {
