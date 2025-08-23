@@ -12,6 +12,7 @@ export default function OverlayMode() {
   const [currentSection, setCurrentSection] = useState("Verse 1");
   const [showDictionary, setShowDictionary] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
+  const [dismissedWords, setDismissedWords] = useState<Set<string>>(new Set());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
@@ -58,10 +59,17 @@ export default function OverlayMode() {
       const previousWords = getPreviousLineWords(text);
       
       if (previousWords.length > 0) {
-        timeoutRef.current = setTimeout(() => {
-          setRhymeWords(previousWords);
-          setShowSuggestions(true);
-        }, 500);
+        // Filter out dismissed words
+        const filteredWords = previousWords.filter(({word}) => !dismissedWords.has(word));
+        
+        if (filteredWords.length > 0) {
+          timeoutRef.current = setTimeout(() => {
+            setRhymeWords(filteredWords);
+            setShowSuggestions(true);
+          }, 500);
+        } else {
+          setShowSuggestions(false);
+        }
       } else {
         setShowSuggestions(false);
       }
@@ -76,16 +84,36 @@ export default function OverlayMode() {
 
   const handleRhymeSelect = (word: string) => {
     setTextContent(prev => {
-      const words = prev.trim().split(/\s+/);
-      if (words.length === 0) {
+      const lines = prev.split('\n');
+      if (lines.length === 0) {
         return word;
       }
       
-      // Replace the last word with the selected rhyme
-      words[words.length - 1] = word;
-      return words.join(' ');
+      const lastLineIndex = lines.length - 1;
+      const lastLine = lines[lastLineIndex];
+      const words = lastLine.trim().split(/\s+/);
+      
+      if (words.length === 0) {
+        lines[lastLineIndex] = word;
+      } else {
+        // Replace the last word of the last line
+        words[words.length - 1] = word;
+        lines[lastLineIndex] = words.join(' ');
+      }
+      
+      return lines.join('\n');
     });
+    // Don't close suggestions automatically - let user choose
+  };
+
+  const handleCloseWord = (wordToClose: string) => {
+    setDismissedWords(prev => new Set(Array.from(prev).concat(wordToClose)));
+    setRhymeWords(prev => prev.filter(({word}) => word !== wordToClose));
+  };
+
+  const handleCloseAllSuggestions = () => {
     setShowSuggestions(false);
+    setDismissedWords(new Set());
   };
 
   return (
@@ -115,7 +143,8 @@ export default function OverlayMode() {
               words={rhymeWords}
               show={showSuggestions}
               onSelect={handleRhymeSelect}
-              onClose={() => setShowSuggestions(false)}
+              onClose={handleCloseAllSuggestions}
+              onCloseWord={handleCloseWord}
             />
           </div>
           
