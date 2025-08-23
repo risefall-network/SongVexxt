@@ -182,8 +182,8 @@ export default function SocialShare({ lyrics, songTitle = "Untitled Song", curre
                   data-testid={`card-template-${template.id}`}
                 >
                   <CardContent className="p-3 text-center">
-                    <div className="text-sm font-medium text-white">{template.name}</div>
-                    <div className="text-xs text-gray-400 mt-1">{template.description}</div>
+                    <div className="text-sm font-medium text-neon-gold">{template.name}</div>
+                    <div className="text-xs text-neon-gold/70 mt-1">{template.description}</div>
                   </CardContent>
                 </Card>
               ))}

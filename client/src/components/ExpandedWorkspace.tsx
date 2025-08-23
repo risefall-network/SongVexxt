@@ -1,4 +1,4 @@
-import SongStructure from "./SongStructure";
+import SongStructureEnhanced from "./SongStructureEnhanced";
 import AIAssistant from "./AIAssistant";
 import Dictionary from "./Dictionary";
 import { useState, useEffect } from "react";
@@ -9,12 +9,15 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { WandSparkles, Book, Save, BarChart3, X, Share2, Search } from "lucide-react";
+import { WandSparkles, Book, Save, BarChart3, X, Share2, Search, BookOpen, Mic } from "lucide-react";
 import SocialShare from "./SocialShare";
 import MoodVisualizer from "./MoodVisualizer";
 import AIGenreSuggestion from "./AIGenreSuggestion";
 import KeyboardSounds from "./KeyboardSounds";
 import TypingIndicator from "./TypingIndicator";
+import AISuggestedLines from "./AISuggestedLines";
+import Thesaurus from "./Thesaurus";
+import SavedAudioFiles from "./SavedAudioFiles";
 
 export default function ExpandedWorkspace() {
   const { user } = useAuth();
@@ -25,6 +28,8 @@ export default function ExpandedWorkspace() {
   const [currentSection, setCurrentSection] = useState("Chorus");
   const [showDictionaryPanel, setShowDictionaryPanel] = useState(false);
   const [showAIPanel, setShowAIPanel] = useState(false);
+  const [showThesaurusPanel, setShowThesaurusPanel] = useState(false);
+  const [showAudioPanel, setShowAudioPanel] = useState(false);
   const [isAIThinking, setIsAIThinking] = useState(false);
 
   // Get active project
@@ -57,8 +62,8 @@ export default function ExpandedWorkspace() {
   // Update project mutation
   const updateProjectMutation = useMutation({
     mutationFn: async (data: { title?: string; lyrics?: string }) => {
-      if (!activeProject?.id) return;
-      await apiRequest("PUT", `/api/projects/${activeProject.id}`, data);
+      if (!activeProject || !(activeProject as any).id) return;
+      await apiRequest("PUT", `/api/projects/${(activeProject as any).id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/projects/active"] });
@@ -120,7 +125,7 @@ export default function ExpandedWorkspace() {
     if (!activeProject) return;
     
     const timeoutId = setTimeout(() => {
-      if (activeProject.lyrics !== lyrics || activeProject.title !== projectTitle) {
+      if ((activeProject as any).lyrics !== lyrics || (activeProject as any).title !== projectTitle) {
         updateProjectMutation.mutate({ title: projectTitle, lyrics });
       }
     }, 2000);
@@ -131,8 +136,8 @@ export default function ExpandedWorkspace() {
   // Load project data
   useEffect(() => {
     if (activeProject) {
-      setLyrics(activeProject.lyrics || "");
-      setProjectTitle(activeProject.title || "Untitled Song");
+      setLyrics((activeProject as any).lyrics || "");
+      setProjectTitle((activeProject as any).title || "Untitled Song");
     }
   }, [activeProject]);
 
@@ -142,6 +147,11 @@ export default function ExpandedWorkspace() {
     } else {
       createProjectMutation.mutate({ title: projectTitle, lyrics });
     }
+  };
+
+  const handleSelectAISuggestion = (suggestion: string) => {
+    const newLyrics = lyrics + (lyrics.endsWith('\n') ? '' : '\n') + suggestion;
+    setLyrics(newLyrics);
   };
 
   const getLyricsStats = () => {
@@ -187,7 +197,7 @@ export default function ExpandedWorkspace() {
           />
         </div>
 
-        <SongStructure 
+        <SongStructureEnhanced 
           currentSection={currentSection}
           onSectionChange={setCurrentSection}
         />
@@ -220,6 +230,22 @@ export default function ExpandedWorkspace() {
                 <Book className="w-4 h-4 mr-2" />
                 Dictionary
               </Button>
+              <Button 
+                onClick={() => setShowThesaurusPanel(!showThesaurusPanel)}
+                className={`cyber-button px-4 py-2 rounded-lg ${showThesaurusPanel ? 'bg-neon-purple/30 border-neon-purple' : ''}`} 
+                data-testid="button-thesaurus-toolbar"
+              >
+                <BookOpen className="w-4 h-4 mr-2" />
+                Thesaurus
+              </Button>
+              <Button 
+                onClick={() => setShowAudioPanel(!showAudioPanel)}
+                className={`cyber-button px-4 py-2 rounded-lg ${showAudioPanel ? 'bg-neon-cyan/30 border-neon-cyan' : ''}`} 
+                data-testid="button-audio-toolbar"
+              >
+                <Mic className="w-4 h-4 mr-2" />
+                Audio Files
+              </Button>
               <SocialShare 
                 lyrics={lyrics}
                 songTitle={projectTitle}
@@ -246,12 +272,12 @@ export default function ExpandedWorkspace() {
         <div className="flex-1 p-6">
           <div className="h-full flex space-x-6">
             {/* Lyrics Editor */}
-            <div className="flex-1">
+            <div className="flex-1 pr-4">
               <div className="mb-4">
                 <h3 className="font-cyber text-lg text-neon-blue mb-2" data-testid="text-editor-title">
                   Lyrics Workspace
                 </h3>
-                <div className="text-sm text-gray-400" data-testid="text-current-section">
+                <div className="text-sm text-neon-gold/70" data-testid="text-current-section">
                   Currently editing: <span className="text-neon-cyan">{currentSection}</span>
                 </div>
               </div>
@@ -260,12 +286,12 @@ export default function ExpandedWorkspace() {
                 value={lyrics}
                 onChange={(e) => setLyrics(e.target.value)}
                 placeholder="Start writing your lyrics here..."
-                className="w-full h-96 bg-cyber-purple/20 border border-neon-blue/30 rounded-xl p-6 text-white placeholder-gray-400 focus:border-neon-blue focus:outline-none font-mono resize-none text-lg leading-relaxed"
+                className="w-full h-80 bg-cyber-purple/20 border border-neon-blue/30 rounded-xl p-6 text-neon-gold placeholder-neon-gold/40 focus:border-neon-blue focus:outline-none font-mono resize-none text-lg leading-relaxed"
                 data-testid="textarea-lyrics-main"
               />
 
               {/* Writing Stats */}
-              <div className="mt-4 flex items-center space-x-6 text-sm text-gray-400">
+              <div className="mt-4 flex items-center space-x-6 text-sm text-neon-gold/70">
                 <div data-testid="stat-lines">
                   Lines: <span className="text-neon-blue">{stats.lineCount}</span>
                 </div>
@@ -278,14 +304,30 @@ export default function ExpandedWorkspace() {
               </div>
             </div>
 
+            {/* AI Suggestions Panel */}
+            <div className="w-80">
+              <AISuggestedLines 
+                lyrics={lyrics}
+                section={currentSection}
+                onSelectSuggestion={handleSelectAISuggestion}
+                className="mb-4"
+              />
+            </div>
+
             {/* AI Assistant Panel */}
             {showAIPanel && <AIAssistant lyrics={lyrics} section={currentSection} />}
           </div>
         </div>
       </div>
 
-      {/* Right Panel - Dictionary & Thesaurus */}
-      {showDictionaryPanel && <Dictionary />}
+      {/* Right Panel - Dictionary, Thesaurus & Audio */}
+      {(showDictionaryPanel || showThesaurusPanel || showAudioPanel) && (
+        <div className="w-80 glass-effect border-l border-neon-blue/20 flex flex-col relative z-10">
+          {showDictionaryPanel && <Dictionary />}
+          {showThesaurusPanel && <Thesaurus />}
+          {showAudioPanel && <SavedAudioFiles currentSection={currentSection} />}
+        </div>
+      )}
     </div>
   );
 }

@@ -29,7 +29,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="bg-cyber-dark text-white min-h-screen font-body">
+        <div className="bg-cyber-dark text-neon-gold min-h-screen font-body">
           <div className="fixed inset-0 cyber-grid opacity-10 pointer-events-none" />
           <Toaster />
           <Router />

@@ -36,7 +36,7 @@ export default function Dictionary() {
             className="w-full bg-cyber-purple/30 border-neon-blue/30 focus:border-neon-blue pl-10 pr-4 py-2 text-sm"
             data-testid="input-dictionary-search"
           />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-neon-gold/50 w-4 h-4" />
         </div>
       </div>
 
@@ -51,8 +51,8 @@ export default function Dictionary() {
             <div className="font-medium text-neon-cyan mb-1" data-testid="text-word-definition">
               {searchTerm}
             </div>
-            <div className="text-xs text-gray-400 mb-2">/hɑːrt/ • noun</div>
-            <div className="text-sm text-gray-300">
+            <div className="text-xs text-neon-gold/70 mb-2">/hɑːrt/ • noun</div>
+            <div className="text-sm text-neon-gold/80">
               The organ that pumps blood through the body; the center of emotions and feelings.
             </div>
           </div>

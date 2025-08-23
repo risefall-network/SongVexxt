@@ -9,7 +9,7 @@ import ExpandedWorkspace from "@/components/ExpandedWorkspace";
 export default function Home() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   // Redirect to home if not authenticated
   useEffect(() => {
