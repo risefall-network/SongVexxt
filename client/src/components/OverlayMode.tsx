@@ -5,6 +5,8 @@ import RhymeSuggestions from "./RhymeSuggestions";
 import Dictionary from "./Dictionary";
 import AIAssistant from "./AIAssistant";
 import SocialShare from "./SocialShare";
+import MoodVisualizer from "./MoodVisualizer";
+import KeyboardSounds from "./KeyboardSounds";
 
 export default function OverlayMode() {
   const [textContent, setTextContent] = useState("I love you with all my heart");
@@ -119,7 +121,13 @@ export default function OverlayMode() {
 
   return (
     <div className="relative h-full" data-testid="overlay-mode">
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl px-4">
+      {/* Mood Visualizer Background */}
+      <MoodVisualizer lyrics={textContent} className="z-0" />
+      
+      {/* Keyboard Sounds */}
+      <KeyboardSounds enabled={true} />
+      
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl px-4 relative z-10">
         <div className="glass-effect rounded-xl p-6 neon-border">
           <div className="mb-4">
             <h3 className="font-cyber text-lg text-neon-blue" data-testid="text-overlay-title">

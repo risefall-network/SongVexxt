@@ -6,6 +6,7 @@ import { insertProjectSchema, insertSectionSchema } from "@shared/schema";
 import { getRhymes, getSynonyms } from "./services/rhymeService";
 import { generateAISuggestions, generateNextLine } from "./services/openai";
 import { generateImage } from "./services/imageService";
+import { analyzeGenre } from "./services/aiService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -174,6 +175,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating next line:", error);
       res.status(500).json({ message: "Failed to generate next line" });
+    }
+  });
+
+  app.post('/api/ai/analyze-genre', isAuthenticated, async (req, res) => {
+    try {
+      const { lyrics } = req.body;
+      if (!lyrics || lyrics.trim().length < 10) {
+        return res.status(400).json({ message: "Lyrics are required and must be at least 10 characters" });
+      }
+      const result = await analyzeGenre(lyrics);
+      res.json(result);
+    } catch (error) {
+      console.error("Error analyzing genre:", error);
+      res.status(500).json({ message: "Failed to analyze genre" });
     }
   });
 

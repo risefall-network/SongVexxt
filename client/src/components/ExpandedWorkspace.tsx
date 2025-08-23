@@ -9,8 +9,12 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { WandSparkles, Book, Save, BarChart3, X, Share2 } from "lucide-react";
+import { WandSparkles, Book, Save, BarChart3, X, Share2, Search } from "lucide-react";
 import SocialShare from "./SocialShare";
+import MoodVisualizer from "./MoodVisualizer";
+import AIGenreSuggestion from "./AIGenreSuggestion";
+import KeyboardSounds from "./KeyboardSounds";
+import TypingIndicator from "./TypingIndicator";
 
 export default function ExpandedWorkspace() {
   const { user } = useAuth();
@@ -21,6 +25,7 @@ export default function ExpandedWorkspace() {
   const [currentSection, setCurrentSection] = useState("Chorus");
   const [showDictionaryPanel, setShowDictionaryPanel] = useState(false);
   const [showAIPanel, setShowAIPanel] = useState(false);
+  const [isAIThinking, setIsAIThinking] = useState(false);
 
   // Get active project
   const { data: activeProject, isLoading: projectLoading } = useQuery({
@@ -152,9 +157,15 @@ export default function ExpandedWorkspace() {
   const stats = getLyricsStats();
 
   return (
-    <div className="flex h-full" data-testid="expanded-workspace">
+    <div className="flex h-full relative" data-testid="expanded-workspace">
+      {/* Mood Visualizer Background */}
+      <MoodVisualizer lyrics={lyrics} className="z-0" />
+      
+      {/* Keyboard Sounds */}
+      <KeyboardSounds enabled={true} />
+      
       {/* Left Sidebar - Song Structure & Tools */}
-      <div className="w-80 glass-effect border-r border-neon-blue/20 flex flex-col">
+      <div className="w-80 glass-effect border-r border-neon-blue/20 flex flex-col relative z-10">
         <div className="p-4 border-b border-neon-blue/20">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-cyber text-lg text-neon-blue" data-testid="text-project-title">Current Project</h3>
@@ -180,10 +191,15 @@ export default function ExpandedWorkspace() {
           currentSection={currentSection}
           onSectionChange={setCurrentSection}
         />
+        
+        {/* AI Genre Suggestion */}
+        <div className="p-4">
+          <AIGenreSuggestion lyrics={lyrics} />
+        </div>
       </div>
 
       {/* Main Writing Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col relative z-10">
         {/* Toolbar */}
         <div className="glass-effect border-b border-neon-blue/20 p-4">
           <div className="flex items-center justify-between">
@@ -214,19 +230,14 @@ export default function ExpandedWorkspace() {
                   Share
                 </Button>
               </SocialShare>
-              <Button 
-                onClick={() => setShowDictionaryPanel(!showDictionaryPanel)}
-                className={`cyber-button px-4 py-2 rounded-lg ${showDictionaryPanel ? 'bg-neon-cyan/30 border-neon-cyan' : ''}`} 
-                data-testid="button-thesaurus"
-              >
-                <Search className="w-4 h-4 mr-2" />
-                Thesaurus
-              </Button>
             </div>
             
-            <div className="flex items-center space-x-2 text-sm text-gray-400" data-testid="text-save-status">
-              <Save className="w-4 h-4 text-neon-blue" />
-              <span>Auto-saved 2 seconds ago</span>
+            <div className="flex items-center space-x-4">
+              {isAIThinking && <TypingIndicator />}
+              <div className="text-sm text-muted-foreground" data-testid="text-save-status">
+                <Save className="w-4 h-4 text-neon-blue inline mr-1" />
+                <span>Auto-saved 2 seconds ago</span>
+              </div>
             </div>
           </div>
         </div>
