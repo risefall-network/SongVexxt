@@ -5,6 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertProjectSchema, insertSectionSchema } from "@shared/schema";
 import { getRhymes, getSynonyms } from "./services/rhymeService";
 import { generateAISuggestions, generateNextLine } from "./services/openai";
+import { generateImage } from "./services/imageService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -173,6 +174,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating next line:", error);
       res.status(500).json({ message: "Failed to generate next line" });
+    }
+  });
+
+  // Lyric card generation route
+  app.post('/api/generate-lyric-card', isAuthenticated, async (req, res) => {
+    try {
+      const { prompt, lyrics, songTitle, currentSection, template } = req.body;
+      
+      if (!lyrics || !songTitle) {
+        return res.status(400).json({ message: "Lyrics and song title are required" });
+      }
+
+      const imageUrl = await generateImage({
+        prompt,
+        lyrics,
+        songTitle,
+        currentSection,
+        template
+      });
+      
+      res.json({ imageUrl });
+    } catch (error) {
+      console.error("Error generating lyric card:", error);
+      res.status(500).json({ message: "Failed to generate lyric card" });
     }
   });
 

@@ -9,7 +9,8 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { WandSparkles, Book, Search, Save } from "lucide-react";
+import { WandSparkles, Book, Save, BarChart3, X, Share2 } from "lucide-react";
+import SocialShare from "./SocialShare";
 
 export default function ExpandedWorkspace() {
   const { user } = useAuth();
@@ -25,20 +26,28 @@ export default function ExpandedWorkspace() {
   const { data: activeProject, isLoading: projectLoading } = useQuery({
     queryKey: ["/api/projects/active"],
     enabled: !!user,
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
-      }
-    },
   });
+
+  // Handle auth errors
+  useEffect(() => {
+    if (activeProject === undefined && !projectLoading && user) {
+      // Check if this is an auth error
+      fetch('/api/projects/active')
+        .then(res => {
+          if (res.status === 401) {
+            toast({
+              title: "Unauthorized",
+              description: "You are logged out. Logging in again...",
+              variant: "destructive",
+            });
+            setTimeout(() => {
+              window.location.href = "/api/login";
+            }, 500);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [activeProject, projectLoading, user, toast]);
 
   // Update project mutation
   const updateProjectMutation = useMutation({
@@ -195,6 +204,16 @@ export default function ExpandedWorkspace() {
                 <Book className="w-4 h-4 mr-2" />
                 Dictionary
               </Button>
+              <SocialShare 
+                lyrics={lyrics}
+                songTitle={projectTitle}
+                currentSection={currentSection}
+              >
+                <Button className="cyber-button px-4 py-2 rounded-lg">
+                  <Share2 className="w-4 h-4 mr-2" />
+                  Share
+                </Button>
+              </SocialShare>
               <Button 
                 onClick={() => setShowDictionaryPanel(!showDictionaryPanel)}
                 className={`cyber-button px-4 py-2 rounded-lg ${showDictionaryPanel ? 'bg-neon-cyan/30 border-neon-cyan' : ''}`} 
