@@ -251,8 +251,8 @@
 }
 
 .text-neon-gold {
-  color: hsl(var(--neon-gold));
-  text-shadow: 0 0 10px hsl(var(--neon-gold) / 0.5);
+  color: hsl(45, 100%, 75%) !important;
+  text-shadow: 0 0 10px hsl(45, 100%, 75%, 0.5) !important;
 }
 
 .bg-cyber-gradient {

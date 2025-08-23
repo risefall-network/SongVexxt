@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 interface MoodVisualizerProps {
   lyrics: string;
   className?: string;
+  isEnabled?: boolean;
 }
 
 interface Mood {
@@ -11,7 +12,7 @@ interface Mood {
   intensity: number;
 }
 
-export default function MoodVisualizer({ lyrics, className = "" }: MoodVisualizerProps) {
+export default function MoodVisualizer({ lyrics, className = "", isEnabled = true }: MoodVisualizerProps) {
   const [currentMood, setCurrentMood] = useState<Mood>({
     name: "neutral",
     colors: ["hsl(240, 100%, 2%)", "hsl(280, 100%, 8%)"],
@@ -88,11 +89,15 @@ export default function MoodVisualizer({ lyrics, className = "" }: MoodVisualize
   };
 
   useEffect(() => {
-    if (lyrics.trim()) {
+    if (lyrics.trim() && isEnabled) {
       const mood = analyzeMood(lyrics);
       setCurrentMood(mood);
     }
-  }, [lyrics]);
+  }, [lyrics, isEnabled]);
+
+  if (!isEnabled) {
+    return null;
+  }
 
   const gradientStyle = {
     background: `radial-gradient(ellipse at center, ${currentMood.colors.join(", ")})`,
