@@ -18,6 +18,8 @@ import TypingIndicator from "./TypingIndicator";
 import AISuggestedLines from "./AISuggestedLines";
 import Thesaurus from "./Thesaurus";
 import SavedAudioFiles from "./SavedAudioFiles";
+import TopNavigation from "./TopNavigation";
+import PreferencesModal from "./PreferencesModal";
 
 export default function ExpandedWorkspace() {
   const { user } = useAuth();
@@ -31,6 +33,8 @@ export default function ExpandedWorkspace() {
   const [showThesaurusPanel, setShowThesaurusPanel] = useState(false);
   const [showAudioPanel, setShowAudioPanel] = useState(false);
   const [isAIThinking, setIsAIThinking] = useState(false);
+  const [visualEffectsEnabled, setVisualEffectsEnabled] = useState(true);
+  const [showPreferences, setShowPreferences] = useState(false);
 
   // Get active project
   const { data: activeProject, isLoading: projectLoading } = useQuery({
@@ -167,9 +171,19 @@ export default function ExpandedWorkspace() {
   const stats = getLyricsStats();
 
   return (
-    <div className="flex h-full relative" data-testid="expanded-workspace">
-      {/* Mood Visualizer Background */}
-      <MoodVisualizer lyrics={lyrics} className="z-0" />
+    <div className="flex flex-col h-full relative" data-testid="expanded-workspace">
+      {/* Top Navigation */}
+      <TopNavigation
+        isExpanded={true}
+        onToggleMode={() => {}}
+        visualEffectsEnabled={visualEffectsEnabled}
+        onToggleVisualEffects={setVisualEffectsEnabled}
+        onOpenPreferences={() => setShowPreferences(true)}
+      />
+      
+      <div className="flex flex-1 relative">
+        {/* Mood Visualizer Background */}
+        <MoodVisualizer lyrics={lyrics} className="z-0" isEnabled={visualEffectsEnabled} />
       
       {/* Keyboard Sounds */}
       <KeyboardSounds enabled={true} />
@@ -321,13 +335,22 @@ export default function ExpandedWorkspace() {
       </div>
 
       {/* Right Panel - Dictionary, Thesaurus & Audio */}
-      {(showDictionaryPanel || showThesaurusPanel || showAudioPanel) && (
-        <div className="w-80 glass-effect border-l border-neon-blue/20 flex flex-col relative z-10">
-          {showDictionaryPanel && <Dictionary />}
-          {showThesaurusPanel && <Thesaurus />}
-          {showAudioPanel && <SavedAudioFiles currentSection={currentSection} />}
-        </div>
-      )}
+        {(showDictionaryPanel || showThesaurusPanel || showAudioPanel) && (
+          <div className="w-80 glass-effect border-l border-neon-blue/20 flex flex-col relative z-10">
+            {showDictionaryPanel && <Dictionary />}
+            {showThesaurusPanel && <Thesaurus />}
+            {showAudioPanel && <SavedAudioFiles currentSection={currentSection} />}
+          </div>
+        )}
+      </div>
+      
+      {/* Preferences Modal */}
+      <PreferencesModal
+        isOpen={showPreferences}
+        onClose={() => setShowPreferences(false)}
+        visualEffectsEnabled={visualEffectsEnabled}
+        onToggleVisualEffects={setVisualEffectsEnabled}
+      />
     </div>
   );
 }

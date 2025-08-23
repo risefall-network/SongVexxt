@@ -8,7 +8,13 @@ import SocialShare from "./SocialShare";
 import MoodVisualizer from "./MoodVisualizer";
 import KeyboardSounds from "./KeyboardSounds";
 
-export default function OverlayMode() {
+interface OverlayModeProps {
+  isExpanded: boolean;
+  onToggleMode: () => void;
+  visualEffectsEnabled?: boolean;
+}
+
+export default function OverlayMode({ isExpanded, onToggleMode, visualEffectsEnabled = true }: OverlayModeProps) {
   const [textContent, setTextContent] = useState("I love you with all my heart");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [rhymeWords, setRhymeWords] = useState<{word: string, lineNumber: number}[]>([]);
@@ -122,7 +128,7 @@ export default function OverlayMode() {
   return (
     <div className="relative h-full" data-testid="overlay-mode">
       {/* Mood Visualizer Background */}
-      <MoodVisualizer lyrics={textContent} className="z-0" />
+      <MoodVisualizer lyrics={textContent} className="z-0" isEnabled={visualEffectsEnabled} />
       
       {/* Keyboard Sounds */}
       <KeyboardSounds enabled={true} />

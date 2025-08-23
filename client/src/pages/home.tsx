@@ -5,11 +5,14 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import TopNavigation from "@/components/TopNavigation";
 import OverlayMode from "@/components/OverlayMode";
 import ExpandedWorkspace from "@/components/ExpandedWorkspace";
+import PreferencesModal from "@/components/PreferencesModal";
 
 export default function Home() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const [isExpanded, setIsExpanded] = useState(true);
+  const [visualEffectsEnabled, setVisualEffectsEnabled] = useState(true);
+  const [showPreferences, setShowPreferences] = useState(false);
 
   // Redirect to home if not authenticated
   useEffect(() => {
@@ -49,17 +52,34 @@ export default function Home() {
 
   return (
     <div className="h-screen w-screen relative overflow-hidden">
-      <TopNavigation 
-        isExpanded={isExpanded} 
-        onToggleMode={toggleMode}
-        data-testid="nav-top"
-      />
+      {!isExpanded && (
+        <TopNavigation 
+          isExpanded={isExpanded} 
+          onToggleMode={toggleMode}
+          visualEffectsEnabled={visualEffectsEnabled}
+          onToggleVisualEffects={setVisualEffectsEnabled}
+          onOpenPreferences={() => setShowPreferences(true)}
+          data-testid="nav-top"
+        />
+      )}
       
       {isExpanded ? (
         <ExpandedWorkspace data-testid="workspace-expanded" />
       ) : (
-        <OverlayMode data-testid="workspace-overlay" />
+        <OverlayMode
+          isExpanded={isExpanded}
+          onToggleMode={toggleMode}
+          visualEffectsEnabled={visualEffectsEnabled}
+          data-testid="workspace-overlay"
+        />
       )}
+      
+      <PreferencesModal
+        isOpen={showPreferences}
+        onClose={() => setShowPreferences(false)}
+        visualEffectsEnabled={visualEffectsEnabled}
+        onToggleVisualEffects={setVisualEffectsEnabled}
+      />
     </div>
   );
 }
