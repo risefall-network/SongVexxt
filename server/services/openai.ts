@@ -56,8 +56,22 @@ Respond with JSON in this format:
       alternativeWords: result.alternativeWords || [],
       emotionalTone: result.emotionalTone || "neutral"
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("OpenAI API error:", error);
+    
+    // Handle specific OpenAI errors
+    if (error.status === 429) {
+      if (error.code === 'insufficient_quota') {
+        throw new Error("OpenAI API quota exceeded. Please check your billing and plan details.");
+      } else {
+        throw new Error("OpenAI API rate limit exceeded. Please try again in a moment.");
+      }
+    } else if (error.status === 401) {
+      throw new Error("OpenAI API authentication failed. Please check your API key.");
+    } else if (error.status === 400) {
+      throw new Error("Invalid request to OpenAI API. Please check your input.");
+    }
+    
     throw new Error("Failed to generate AI suggestions");
   }
 }
@@ -94,8 +108,22 @@ Respond with only the suggested line, no additional text.
     });
 
     return response.choices[0].message.content?.trim() || "";
-  } catch (error) {
+  } catch (error: any) {
     console.error("OpenAI API error:", error);
+    
+    // Handle specific OpenAI errors
+    if (error.status === 429) {
+      if (error.code === 'insufficient_quota') {
+        throw new Error("OpenAI API quota exceeded. Please check your billing and plan details.");
+      } else {
+        throw new Error("OpenAI API rate limit exceeded. Please try again in a moment.");
+      }
+    } else if (error.status === 401) {
+      throw new Error("OpenAI API authentication failed. Please check your API key.");
+    } else if (error.status === 400) {
+      throw new Error("Invalid request to OpenAI API. Please check your input.");
+    }
+    
     throw new Error("Failed to generate next line");
   }
 }
@@ -154,8 +182,22 @@ Respond with JSON in this format:
       emotionalTone: result.emotionalTone || "neutral",
       suggestions: result.suggestions || []
     };
-  } catch (error) {
+  } catch (error: any) {
     console.error("OpenAI API error:", error);
+    
+    // Handle specific OpenAI errors
+    if (error.status === 429) {
+      if (error.code === 'insufficient_quota') {
+        throw new Error("OpenAI API quota exceeded. Please check your billing and plan details.");
+      } else {
+        throw new Error("OpenAI API rate limit exceeded. Please try again in a moment.");
+      }
+    } else if (error.status === 401) {
+      throw new Error("OpenAI API authentication failed. Please check your API key.");
+    } else if (error.status === 400) {
+      throw new Error("Invalid request to OpenAI API. Please check your input.");
+    }
+    
     throw new Error("Failed to analyze lyrics");
   }
 }
