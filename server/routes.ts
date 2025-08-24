@@ -161,9 +161,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { lyrics, context } = req.body;
       const suggestions = await generateAISuggestions(lyrics, context);
       res.json(suggestions);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating AI suggestions:", error);
-      res.status(500).json({ message: "Failed to generate AI suggestions" });
+      const message = error.message || "Failed to generate AI suggestions";
+      res.status(500).json({ message });
     }
   });
 
@@ -172,9 +173,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { lyrics, section } = req.body;
       const nextLine = await generateNextLine(lyrics, section);
       res.json({ suggestion: nextLine });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating next line:", error);
-      res.status(500).json({ message: "Failed to generate next line" });
+      const message = error.message || "Failed to generate next line";
+      res.status(500).json({ message });
     }
   });
 
@@ -186,9 +188,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       const result = await analyzeGenre(lyrics);
       res.json(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error analyzing genre:", error);
-      res.status(500).json({ message: "Failed to analyze genre" });
+      const message = error.message || "Failed to analyze genre";
+      res.status(500).json({ message });
     }
   });
 
