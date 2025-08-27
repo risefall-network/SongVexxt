@@ -171,7 +171,7 @@ export default function ExpandedWorkspace() {
   const stats = getLyricsStats();
 
   return (
-    <div className="flex flex-col h-full relative" data-testid="expanded-workspace">
+    <div className="flex flex-col min-h-screen relative" data-testid="expanded-workspace">
       {/* Top Navigation */}
       <TopNavigation
         isExpanded={true}
@@ -181,7 +181,7 @@ export default function ExpandedWorkspace() {
         onOpenPreferences={() => setShowPreferences(true)}
       />
       
-      <div className="flex flex-1 relative">
+      <div className="flex flex-1 relative min-h-0">
         {/* Mood Visualizer Background */}
         <MoodVisualizer lyrics={lyrics} className="z-0" isEnabled={visualEffectsEnabled} />
       
@@ -189,7 +189,7 @@ export default function ExpandedWorkspace() {
       <KeyboardSounds enabled={true} />
       
       {/* Left Sidebar - Song Structure & Tools */}
-      <div className="w-80 glass-effect border-r border-neon-blue/20 flex flex-col relative z-10">
+      <div className="w-72 xl:w-80 glass-effect border-r border-neon-blue/20 flex flex-col relative z-10 overflow-y-auto max-h-screen scrollbar-custom">
         <div className="p-4 border-b border-neon-blue/20">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-cyber text-lg text-neon-blue" data-testid="text-project-title">Current Project</h3>
@@ -223,70 +223,71 @@ export default function ExpandedWorkspace() {
       </div>
 
       {/* Main Writing Area */}
-      <div className="flex-1 flex flex-col relative z-10">
+      <div className="flex-1 flex flex-col relative z-10 overflow-y-auto max-h-screen scrollbar-custom">
         {/* Toolbar */}
-        <div className="glass-effect border-b border-neon-blue/20 p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+        <div className="glass-effect border-b border-neon-blue/20 p-2 xl:p-4">
+          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-2">
+            <div className="flex flex-wrap items-center gap-2 xl:space-x-2">
               <Button 
                 onClick={() => setShowAIPanel(!showAIPanel)}
-                className={`cyber-button px-4 py-2 rounded-lg ${showAIPanel ? 'bg-neon-purple/30 border-neon-purple' : ''}`} 
+                className={`cyber-button px-2 xl:px-4 py-1 xl:py-2 rounded text-xs xl:text-sm ${showAIPanel ? 'bg-neon-purple/30 border-neon-purple' : ''}`} 
                 data-testid="button-ai-assist-toolbar"
               >
-                <WandSparkles className="w-4 h-4 mr-2" />
-                AI Assist
+                <WandSparkles className="w-3 xl:w-4 h-3 xl:h-4 xl:mr-2" />
+                <span className="hidden sm:inline">AI Assist</span>
               </Button>
               <Button 
                 onClick={() => setShowDictionaryPanel(!showDictionaryPanel)}
-                className={`cyber-button px-4 py-2 rounded-lg ${showDictionaryPanel ? 'bg-neon-blue/30 border-neon-blue' : ''}`} 
+                className={`cyber-button px-2 xl:px-4 py-1 xl:py-2 rounded text-xs xl:text-sm ${showDictionaryPanel ? 'bg-neon-blue/30 border-neon-blue' : ''}`} 
                 data-testid="button-dictionary-toolbar"
               >
-                <Book className="w-4 h-4 mr-2" />
-                Dictionary
+                <Book className="w-3 xl:w-4 h-3 xl:h-4 xl:mr-2" />
+                <span className="hidden sm:inline">Dictionary</span>
               </Button>
               <Button 
                 onClick={() => setShowThesaurusPanel(!showThesaurusPanel)}
-                className={`cyber-button px-4 py-2 rounded-lg ${showThesaurusPanel ? 'bg-neon-purple/30 border-neon-purple' : ''}`} 
+                className={`cyber-button px-2 xl:px-4 py-1 xl:py-2 rounded text-xs xl:text-sm ${showThesaurusPanel ? 'bg-neon-purple/30 border-neon-purple' : ''}`} 
                 data-testid="button-thesaurus-toolbar"
               >
-                <BookOpen className="w-4 h-4 mr-2" />
-                Thesaurus
+                <BookOpen className="w-3 xl:w-4 h-3 xl:h-4 xl:mr-2" />
+                <span className="hidden sm:inline">Thesaurus</span>
               </Button>
               <Button 
                 onClick={() => setShowAudioPanel(!showAudioPanel)}
-                className={`cyber-button px-4 py-2 rounded-lg ${showAudioPanel ? 'bg-neon-cyan/30 border-neon-cyan' : ''}`} 
+                className={`cyber-button px-2 xl:px-4 py-1 xl:py-2 rounded text-xs xl:text-sm ${showAudioPanel ? 'bg-neon-cyan/30 border-neon-cyan' : ''}`} 
                 data-testid="button-audio-toolbar"
               >
-                <Mic className="w-4 h-4 mr-2" />
-                Audio Files
+                <Mic className="w-3 xl:w-4 h-3 xl:h-4 xl:mr-2" />
+                <span className="hidden sm:inline">Audio</span>
               </Button>
               <SocialShare 
                 lyrics={lyrics}
                 songTitle={projectTitle}
                 currentSection={currentSection}
               >
-                <Button className="cyber-button px-4 py-2 rounded-lg">
-                  <Share2 className="w-4 h-4 mr-2" />
-                  Share
+                <Button className="cyber-button px-2 xl:px-4 py-1 xl:py-2 rounded text-xs xl:text-sm">
+                  <Share2 className="w-3 xl:w-4 h-3 xl:h-4 xl:mr-2" />
+                  <span className="hidden sm:inline">Share</span>
                 </Button>
               </SocialShare>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 xl:space-x-4">
               {isAIThinking && <TypingIndicator />}
-              <div className="text-sm text-muted-foreground" data-testid="text-save-status">
-                <Save className="w-4 h-4 text-neon-blue inline mr-1" />
-                <span>Auto-saved 2 seconds ago</span>
+              <div className="text-xs xl:text-sm text-muted-foreground" data-testid="text-save-status">
+                <Save className="w-3 xl:w-4 h-3 xl:h-4 text-neon-blue inline mr-1" />
+                <span className="hidden sm:inline">Auto-saved 2s ago</span>
+                <span className="sm:hidden">Saved</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Main Editor */}
-        <div className="flex-1 p-6">
-          <div className="h-full flex space-x-6">
+        <div className="flex-1 p-4 xl:p-6">
+          <div className="flex flex-col xl:flex-row xl:space-x-6 space-y-4 xl:space-y-0">
             {/* Lyrics Editor */}
-            <div className="flex-1 pr-4">
+            <div className="flex-1 xl:pr-4">
               <div className="mb-4">
                 <h3 className="font-cyber text-lg text-neon-blue mb-2" data-testid="text-editor-title">
                   Lyrics Workspace
@@ -300,7 +301,7 @@ export default function ExpandedWorkspace() {
                 value={lyrics}
                 onChange={(e) => setLyrics(e.target.value)}
                 placeholder="Start writing your lyrics here..."
-                className="w-full h-80 bg-cyber-purple/20 border border-neon-blue/30 rounded-xl p-6 text-neon-gold placeholder-neon-gold/40 focus:border-neon-blue focus:outline-none font-mono resize-none text-lg leading-relaxed"
+                className="w-full h-64 xl:h-80 bg-cyber-purple/20 border border-neon-blue/30 rounded-xl p-4 xl:p-6 text-neon-gold placeholder-neon-gold/40 focus:border-neon-blue focus:outline-none font-mono resize-y text-base xl:text-lg leading-relaxed scrollbar-custom"
                 data-testid="textarea-lyrics-main"
               />
 
@@ -319,7 +320,7 @@ export default function ExpandedWorkspace() {
             </div>
 
             {/* AI Suggestions Panel */}
-            <div className="w-80">
+            <div className="w-full xl:w-80">
               <AISuggestedLines 
                 lyrics={lyrics}
                 section={currentSection}
@@ -336,7 +337,7 @@ export default function ExpandedWorkspace() {
 
       {/* Right Panel - Dictionary, Thesaurus & Audio */}
         {(showDictionaryPanel || showThesaurusPanel || showAudioPanel) && (
-          <div className="w-80 glass-effect border-l border-neon-blue/20 flex flex-col relative z-10">
+          <div className="w-72 xl:w-80 glass-effect border-l border-neon-blue/20 flex flex-col relative z-10 overflow-y-auto max-h-screen scrollbar-custom">
             {showDictionaryPanel && <Dictionary />}
             {showThesaurusPanel && <Thesaurus />}
             {showAudioPanel && <SavedAudioFiles currentSection={currentSection} />}

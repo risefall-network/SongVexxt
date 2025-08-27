@@ -51,7 +51,7 @@ export default function Home() {
   };
 
   return (
-    <div className="h-screen w-screen relative overflow-hidden">
+    <div className="min-h-screen w-full relative">
       {!isExpanded && (
         <TopNavigation 
           isExpanded={isExpanded} 
