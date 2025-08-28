@@ -20,6 +20,7 @@ import Thesaurus from "./Thesaurus";
 import SavedAudioFiles from "./SavedAudioFiles";
 import TopNavigation from "./TopNavigation";
 import PreferencesModal from "./PreferencesModal";
+import RhymeAssistant from "./RhymeAssistant";
 
 export default function ExpandedWorkspace() {
   const { user } = useAuth();
@@ -32,6 +33,8 @@ export default function ExpandedWorkspace() {
   const [showAIPanel, setShowAIPanel] = useState(false);
   const [showThesaurusPanel, setShowThesaurusPanel] = useState(false);
   const [showAudioPanel, setShowAudioPanel] = useState(false);
+  const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(false);
+  const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [visualEffectsEnabled, setVisualEffectsEnabled] = useState(true);
   const [showPreferences, setShowPreferences] = useState(false);
@@ -158,6 +161,22 @@ export default function ExpandedWorkspace() {
     setLyrics(newLyrics);
   };
 
+  const handleSelectRhyme = (word: string) => {
+    const lines = lyrics.split('\n');
+    const currentLineIndex = lines.length - 1;
+    const currentLine = lines[currentLineIndex] || '';
+    const words = currentLine.trim().split(/\s+/);
+    
+    if (words.length === 0 || (words.length === 1 && words[0] === '')) {
+      lines[currentLineIndex] = word;
+    } else {
+      words[words.length - 1] = word;
+      lines[currentLineIndex] = words.join(' ');
+    }
+    
+    setLyrics(lines.join('\n'));
+  };
+
   const getLyricsStats = () => {
     const lines = lyrics.split('\n').filter(line => line.trim().length > 0);
     const words = lyrics.split(/\s+/).filter(word => word.trim().length > 0);
@@ -189,8 +208,15 @@ export default function ExpandedWorkspace() {
       <KeyboardSounds enabled={true} />
       
       {/* Left Sidebar - Song Structure & Tools */}
-      <div className="w-72 xl:w-80 glass-effect border-r border-neon-blue/20 flex flex-col relative z-10 overflow-y-auto max-h-screen scrollbar-custom">
-        <div className="p-4 border-b border-neon-blue/20">
+      <div className={`${leftSidebarCollapsed ? 'w-12' : 'w-64 lg:w-72 xl:w-80'} transition-all duration-300 glass-effect border-r border-neon-blue/20 flex flex-col relative z-10 overflow-y-auto max-h-screen scrollbar-custom`}>
+        <Button
+          onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
+          className="absolute -right-3 top-4 z-20 cyber-button p-1 rounded-full w-6 h-6"
+          data-testid="button-toggle-left-sidebar"
+        >
+          {leftSidebarCollapsed ? '>' : '<'}
+        </Button>
+        {!leftSidebarCollapsed && <div className="p-3 border-b border-neon-blue/20">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-cyber text-lg text-neon-blue" data-testid="text-project-title">Current Project</h3>
             <Button 
@@ -209,17 +235,21 @@ export default function ExpandedWorkspace() {
             className="bg-cyber-purple/30 border-neon-blue/30 focus:border-neon-blue"
             data-testid="input-project-title"
           />
-        </div>
+        </div>}
 
-        <SongStructureEnhanced 
-          currentSection={currentSection}
-          onSectionChange={setCurrentSection}
-        />
-        
-        {/* AI Genre Suggestion */}
-        <div className="p-4">
-          <AIGenreSuggestion lyrics={lyrics} />
-        </div>
+        {!leftSidebarCollapsed && (
+          <>
+            <SongStructureEnhanced 
+              currentSection={currentSection}
+              onSectionChange={setCurrentSection}
+            />
+            
+            {/* AI Genre Suggestion */}
+            <div className="p-3">
+              <AIGenreSuggestion lyrics={lyrics} />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Main Writing Area */}
@@ -284,15 +314,15 @@ export default function ExpandedWorkspace() {
         </div>
 
         {/* Main Editor */}
-        <div className="flex-1 p-4 xl:p-6">
-          <div className="flex flex-col xl:flex-row xl:space-x-6 space-y-4 xl:space-y-0">
+        <div className="flex-1 p-2 lg:p-4 xl:p-6 overflow-y-auto max-h-[calc(100vh-200px)] scrollbar-custom">
+          <div className="space-y-4">
             {/* Lyrics Editor */}
-            <div className="flex-1 xl:pr-4">
-              <div className="mb-4">
-                <h3 className="font-cyber text-lg text-neon-blue mb-2" data-testid="text-editor-title">
+            <div className="w-full">
+              <div className="mb-3">
+                <h3 className="font-cyber text-base lg:text-lg text-neon-blue mb-2" data-testid="text-editor-title">
                   Lyrics Workspace
                 </h3>
-                <div className="text-sm text-neon-gold/70" data-testid="text-current-section">
+                <div className="text-xs lg:text-sm text-neon-gold/70" data-testid="text-current-section">
                   Currently editing: <span className="text-neon-cyan">{currentSection}</span>
                 </div>
               </div>
@@ -301,12 +331,12 @@ export default function ExpandedWorkspace() {
                 value={lyrics}
                 onChange={(e) => setLyrics(e.target.value)}
                 placeholder="Start writing your lyrics here..."
-                className="w-full h-64 xl:h-80 bg-cyber-purple/20 border border-neon-blue/30 rounded-xl p-4 xl:p-6 text-neon-gold placeholder-neon-gold/40 focus:border-neon-blue focus:outline-none font-mono resize-y text-base xl:text-lg leading-relaxed scrollbar-custom"
+                className="w-full h-48 lg:h-64 xl:h-80 bg-cyber-purple/20 border border-neon-blue/30 rounded-xl p-3 lg:p-4 xl:p-6 text-neon-gold placeholder-neon-gold/40 focus:border-neon-blue focus:outline-none font-mono resize-y text-sm lg:text-base xl:text-lg leading-relaxed scrollbar-custom"
                 data-testid="textarea-lyrics-main"
               />
 
               {/* Writing Stats */}
-              <div className="mt-4 flex items-center space-x-6 text-sm text-neon-gold/70">
+              <div className="mt-3 flex flex-wrap items-center gap-4 text-xs lg:text-sm text-neon-gold/70">
                 <div data-testid="stat-lines">
                   Lines: <span className="text-neon-blue">{stats.lineCount}</span>
                 </div>
@@ -319,8 +349,16 @@ export default function ExpandedWorkspace() {
               </div>
             </div>
 
+            {/* Rhyme Assistant */}
+            <div className="w-full">
+              <RhymeAssistant 
+                lyrics={lyrics}
+                onSelectWord={handleSelectRhyme}
+              />
+            </div>
+
             {/* AI Suggestions Panel */}
-            <div className="w-full xl:w-80">
+            <div className="w-full">
               <AISuggestedLines 
                 lyrics={lyrics}
                 section={currentSection}
@@ -330,17 +368,32 @@ export default function ExpandedWorkspace() {
             </div>
 
             {/* AI Assistant Panel */}
-            {showAIPanel && <AIAssistant lyrics={lyrics} section={currentSection} />}
+            {showAIPanel && (
+              <div className="w-full">
+                <AIAssistant lyrics={lyrics} section={currentSection} />
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Right Panel - Dictionary, Thesaurus & Audio */}
         {(showDictionaryPanel || showThesaurusPanel || showAudioPanel) && (
-          <div className="w-72 xl:w-80 glass-effect border-l border-neon-blue/20 flex flex-col relative z-10 overflow-y-auto max-h-screen scrollbar-custom">
-            {showDictionaryPanel && <Dictionary />}
-            {showThesaurusPanel && <Thesaurus />}
-            {showAudioPanel && <SavedAudioFiles currentSection={currentSection} />}
+          <div className={`${rightSidebarCollapsed ? 'w-12' : 'w-64 lg:w-72 xl:w-80'} transition-all duration-300 glass-effect border-l border-neon-blue/20 flex flex-col relative z-10 overflow-y-auto max-h-screen scrollbar-custom`}>
+            <Button
+              onClick={() => setRightSidebarCollapsed(!rightSidebarCollapsed)}
+              className="absolute -left-3 top-4 z-20 cyber-button p-1 rounded-full w-6 h-6"
+              data-testid="button-toggle-right-sidebar"
+            >
+              {rightSidebarCollapsed ? '<' : '>'}
+            </Button>
+            {!rightSidebarCollapsed && (
+              <>
+                {showDictionaryPanel && <Dictionary />}
+                {showThesaurusPanel && <Thesaurus />}
+                {showAudioPanel && <SavedAudioFiles currentSection={currentSection} />}
+              </>
+            )}
           </div>
         )}
       </div>

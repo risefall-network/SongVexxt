@@ -75,7 +75,7 @@ export default function OverlayMode({ isExpanded, onToggleMode, visualEffectsEna
           timeoutRef.current = setTimeout(() => {
             setRhymeWords(filteredWords);
             setShowSuggestions(true);
-          }, 500);
+          }, 800); // Slightly longer delay
         } else {
           setShowSuggestions(false);
         }
@@ -85,7 +85,7 @@ export default function OverlayMode({ isExpanded, onToggleMode, visualEffectsEna
     } else {
       setShowSuggestions(false);
     }
-  }, [textContent]);
+  }, [textContent, dismissedWords]);
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTextContent(e.target.value);
