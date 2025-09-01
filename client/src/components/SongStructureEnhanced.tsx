@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 import { 
   Music, 
   Plus, 
@@ -13,80 +16,149 @@ import {
   Save, 
   X, 
   FileText,
-  Layers
+  Layers,
+  GripVertical
 } from "lucide-react";
-
-interface SongSection {
-  id: string;
-  name: string;
-  lyrics: string;
-  isVisible: boolean;
-  order: number;
-}
+import type { Section } from "@shared/schema";
 
 interface SongStructureEnhancedProps {
+  projectId: string | null;
   currentSection: string;
-  onSectionChange: (section: string) => void;
+  onSectionChange: (section: Section) => void;
+  onSectionContentChange: (sectionId: string, content: string) => void;
+  currentLyrics: string;
   className?: string;
 }
 
 export default function SongStructureEnhanced({ 
+  projectId,
   currentSection, 
-  onSectionChange, 
+  onSectionChange,
+  onSectionContentChange,
+  currentLyrics,
   className = "" 
 }: SongStructureEnhancedProps) {
-  const [sections, setSections] = useState<SongSection[]>([
-    { id: "verse1", name: "Verse 1", lyrics: "Every morning I wake up thinking of you\nWondering if you feel the same way too", isVisible: true, order: 1 },
-    { id: "chorus", name: "Chorus", lyrics: "You're my everything, my heart, my soul\nWithout you here I'm not whole", isVisible: true, order: 2 },
-    { id: "verse2", name: "Verse 2", lyrics: "Walking through the streets we used to know\nMemories of love begin to show", isVisible: true, order: 3 },
-    { id: "bridge", name: "Bridge", lyrics: "Time stands still when you're near\nAll my doubts just disappear", isVisible: true, order: 4 }
-  ]);
-  
   const [showCombined, setShowCombined] = useState(false);
-  const [editingSection, setEditingSection] = useState<string | null>(null);
   const [newSectionName, setNewSectionName] = useState("");
+  const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set());
+  const queryClient = useQueryClient();
+  
+  // Fetch sections for the current project
+  const { data: sections = [], isLoading } = useQuery({
+    queryKey: ["/api/projects", projectId, "sections"],
+    enabled: !!projectId,
+  });
+  
+  // Initialize all sections as visible
+  useEffect(() => {
+    if (sections.length > 0) {
+      setVisibleSections(new Set(sections.map((s: Section) => s.id)));
+    }
+  }, [sections]);
 
-  const addNewSection = () => {
-    if (!newSectionName.trim()) return;
+  // Mutations for section operations
+  const createSectionMutation = useMutation({
+    mutationFn: async (data: { projectId: string; type: string; order: number }) => {
+      return await apiRequest("POST", "/api/sections", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "sections"] });
+    },
+  });
+  
+  const updateSectionMutation = useMutation({
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Section> }) => {
+      return await apiRequest("PUT", `/api/sections/${id}`, updates);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "sections"] });
+    },
+  });
+  
+  const reorderSectionsMutation = useMutation({
+    mutationFn: async (sectionOrders: { id: string; order: number }[]) => {
+      return await apiRequest("PUT", `/api/projects/${projectId}/sections/reorder`, { sectionOrders });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", projectId, "sections"] });
+    },
+  });
+  
+  const addNewSection = async () => {
+    if (!newSectionName.trim() || !projectId) return;
     
-    const newSection: SongSection = {
-      id: Date.now().toString(),
-      name: newSectionName,
-      lyrics: "",
-      isVisible: true,
-      order: sections.length + 1
-    };
+    await createSectionMutation.mutateAsync({
+      projectId,
+      type: newSectionName,
+      order: sections.length + 1,
+    });
     
-    setSections(prev => [...prev, newSection]);
     setNewSectionName("");
-    onSectionChange(newSection.name);
+  };
+  
+  const handleDragEnd = async (result: DropResult) => {
+    if (!result.destination) return;
+    
+    const sourceIndex = result.source.index;
+    const destinationIndex = result.destination.index;
+    
+    if (sourceIndex === destinationIndex) return;
+    
+    // Optimistically update the UI
+    const reorderedSections = Array.from(sections);
+    const [movedSection] = reorderedSections.splice(sourceIndex, 1);
+    reorderedSections.splice(destinationIndex, 0, movedSection);
+    
+    // Update the orders
+    const sectionOrders = reorderedSections.map((section: Section, index) => ({
+      id: section.id,
+      order: index + 1,
+    }));
+    
+    try {
+      await reorderSectionsMutation.mutateAsync(sectionOrders);
+    } catch (error) {
+      console.error('Failed to reorder sections:', error);
+    }
   };
 
   const toggleSectionVisibility = (id: string) => {
-    setSections(prev => prev.map(section => 
-      section.id === id 
-        ? { ...section, isVisible: !section.isVisible }
-        : section
-    ));
+    setVisibleSections(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+  
+  const handleSectionClick = async (section: Section) => {
+    // Save current section content before switching
+    if (currentSection && currentLyrics) {
+      const currentSectionData = sections.find((s: Section) => s.type === currentSection);
+      if (currentSectionData && currentSectionData.content !== currentLyrics) {
+        await updateSectionMutation.mutateAsync({
+          id: currentSectionData.id,
+          updates: { content: currentLyrics },
+        });
+      }
+    }
+    
+    // Switch to new section
+    onSectionChange(section);
   };
 
-  const updateSectionLyrics = (id: string, lyrics: string) => {
-    setSections(prev => prev.map(section => 
-      section.id === id 
-        ? { ...section, lyrics }
-        : section
-    ));
-  };
-
-  const getSectionById = (name: string) => {
-    return sections.find(section => section.name === name);
+  const getSectionById = (type: string) => {
+    return sections.find((section: Section) => section.type === type);
   };
 
   const getCombinedLyrics = () => {
     return sections
-      .filter(section => section.isVisible)
-      .sort((a, b) => a.order - b.order)
-      .map(section => `[${section.name}]\n${section.lyrics}`)
+      .filter((section: Section) => visibleSections.has(section.id))
+      .sort((a: Section, b: Section) => a.order - b.order)
+      .map((section: Section) => `[${section.type}]\n${section.content || ""}`)
       .join('\n\n');
   };
 
@@ -116,33 +188,97 @@ export default function SongStructureEnhanced({
         <div className="space-y-4">
           <div className="text-center">
             <div className="text-xs text-neon-gold/70 mb-2">
-              {sections.filter(s => s.isVisible).length} sections • {getWordCount(getCombinedLyrics())} words
+              {sections.filter((s: Section) => visibleSections.has(s.id)).length} sections • {getWordCount(getCombinedLyrics())} words
             </div>
           </div>
 
-          <div className="max-h-[600px] overflow-y-auto">
-            <pre className="text-neon-gold font-mono text-sm leading-relaxed whitespace-pre-wrap bg-cyber-purple/10 p-4 rounded-lg border border-neon-blue/20">
-              {getCombinedLyrics() || "No lyrics written yet..."}
-            </pre>
+          <div className="max-h-[500px] overflow-y-auto scrollbar-custom">
+            <div className="bg-cyber-purple/10 p-4 rounded-lg border border-neon-blue/20">
+              {sections.filter((s: Section) => visibleSections.has(s.id)).length === 0 ? (
+                <div className="text-center text-neon-gold/50 py-8">
+                  <FileText className="w-8 h-8 mx-auto mb-2 text-neon-blue/30" />
+                  <p>No sections visible</p>
+                  <p className="text-xs mt-1">Enable sections below to see your complete song</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {sections
+                    .filter((s: Section) => visibleSections.has(s.id))
+                    .sort((a: Section, b: Section) => a.order - b.order)
+                    .map((section: Section, index) => (
+                      <div key={section.id} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-cyber text-sm text-neon-cyan bg-cyber-blue/20 px-2 py-1 rounded border border-neon-blue/30">
+                            {section.type}
+                          </h4>
+                          <Button
+                            onClick={() => onSectionChange(section)}
+                            className="cyber-button text-xs px-2 py-1"
+                            data-testid={`edit-section-${section.id}`}
+                          >
+                            <Edit className="w-3 h-3 mr-1" />
+                            Edit
+                          </Button>
+                        </div>
+                        <div className="pl-4 border-l-2 border-neon-blue/30">
+                          {section.content ? (
+                            <pre className="text-neon-gold font-mono text-sm leading-relaxed whitespace-pre-wrap">
+                              {section.content}
+                            </pre>
+                          ) : (
+                            <div className="text-neon-gold/50 italic text-sm py-2">
+                              No lyrics yet - click Edit to add content
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {sections.map(section => (
-              <Badge
-                key={section.id}
-                variant="outline"
-                className={`text-xs cursor-pointer ${
-                  section.isVisible 
-                    ? "border-neon-blue text-neon-blue bg-cyber-blue/20" 
-                    : "border-neon-gold/30 text-neon-gold/30 bg-cyber-purple/10"
-                }`}
-                onClick={() => toggleSectionVisibility(section.id)}
-                data-testid={`section-badge-${section.id}`}
+          <div className="space-y-3">
+            <div className="text-xs text-neon-gold/70 text-center">
+              Toggle section visibility:
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {sections.map((section: Section) => (
+                <Badge
+                  key={section.id}
+                  variant="outline"
+                  className={`text-xs cursor-pointer transition-colors ${
+                    visibleSections.has(section.id) 
+                      ? "border-neon-blue text-neon-blue bg-cyber-blue/20 hover:bg-cyber-blue/30" 
+                      : "border-neon-gold/30 text-neon-gold/30 bg-cyber-purple/10 hover:bg-cyber-purple/20"
+                  }`}
+                  onClick={() => toggleSectionVisibility(section.id)}
+                  data-testid={`section-badge-${section.id}`}
+                >
+                  {visibleSections.has(section.id) ? <Eye className="w-2 h-2 mr-1" /> : <EyeOff className="w-2 h-2 mr-1" />}
+                  {section.type}
+                </Badge>
+              ))}
+            </div>
+            
+            <div className="flex gap-2 pt-2">
+              <Button
+                onClick={() => setVisibleSections(new Set(sections.map((s: Section) => s.id)))}
+                className="cyber-button text-xs flex-1"
+                data-testid="show-all-sections"
               >
-                {section.isVisible ? <Eye className="w-2 h-2 mr-1" /> : <EyeOff className="w-2 h-2 mr-1" />}
-                {section.name}
-              </Badge>
-            ))}
+                <Eye className="w-3 h-3 mr-1" />
+                Show All
+              </Button>
+              <Button
+                onClick={() => setVisibleSections(new Set())}
+                className="cyber-button text-xs flex-1"
+                data-testid="hide-all-sections"
+              >
+                <EyeOff className="w-3 h-3 mr-1" />
+                Hide All
+              </Button>
+            </div>
           </div>
         </div>
       </Card>
@@ -168,63 +304,97 @@ export default function SongStructureEnhanced({
       </div>
 
       <div className="space-y-3 mb-4">
-        {sections.map((section) => (
-          <div
-            key={section.id}
-            className={`p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
-              currentSection === section.name
-                ? "bg-neon-blue/20 border-neon-blue"
-                : "bg-cyber-purple/20 border-neon-purple/30 hover:border-neon-purple/50"
-            }`}
-            onClick={() => onSectionChange(section.name)}
-            data-testid={`section-${section.id}`}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <h4 className="font-medium text-neon-gold text-sm">
-                  {section.name}
-                </h4>
-                {currentSection === section.name && (
-                  <Badge variant="outline" className="border-neon-cyan text-neon-cyan bg-cyber-blue/20 text-xs">
-                    Active
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleSectionVisibility(section.id);
-                  }}
-                  className="h-5 w-5 p-0 hover:bg-neon-purple/20"
-                  data-testid={`toggle-visibility-${section.id}`}
-                >
-                  {section.isVisible ? (
-                    <Eye className="h-2 w-2 text-neon-blue" />
-                  ) : (
-                    <EyeOff className="h-2 w-2 text-neon-gold/50" />
-                  )}
-                </Button>
-              </div>
-            </div>
-            
-            <div className="text-xs text-neon-gold/70">
-              {section.lyrics ? (
-                <>
-                  {section.lyrics.split('\n')[0]}
-                  {section.lyrics.split('\n').length > 1 && "..."}
-                  <div className="mt-1">
-                    {getWordCount(section.lyrics)} words • {section.lyrics.split('\n').length} lines
-                  </div>
-                </>
-              ) : (
-                <span className="italic">No lyrics yet...</span>
-              )}
-            </div>
+        {isLoading ? (
+          <div className="text-center text-neon-gold/50 py-4">Loading sections...</div>
+        ) : sections.length === 0 ? (
+          <div className="text-center text-neon-gold/50 py-4">
+            <p>No sections yet. Add your first section below!</p>
           </div>
-        ))}
+        ) : (
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="sections-list">
+              {(provided) => (
+                <div
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                  className="space-y-3"
+                >
+                  {sections.map((section: Section, index) => (
+                    <Draggable key={section.id} draggableId={section.id} index={index}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          className={`p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
+                            currentSection === section.type
+                              ? "bg-neon-blue/20 border-neon-blue"
+                              : "bg-cyber-purple/20 border-neon-purple/30 hover:border-neon-purple/50"
+                          } ${
+                            snapshot.isDragging ? "shadow-lg shadow-neon-blue/50 rotate-1" : ""
+                          }`}
+                          onClick={() => !snapshot.isDragging && handleSectionClick(section)}
+                          data-testid={`section-${section.id}`}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div
+                                {...provided.dragHandleProps}
+                                className="cursor-grab active:cursor-grabbing"
+                              >
+                                <GripVertical className="h-3 w-3 text-neon-gold/50 hover:text-neon-gold" />
+                              </div>
+                              <h4 className="font-medium text-neon-gold text-sm">
+                                {section.type}
+                              </h4>
+                              {currentSection === section.type && (
+                                <Badge variant="outline" className="border-neon-cyan text-neon-cyan bg-cyber-blue/20 text-xs">
+                                  Active
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  toggleSectionVisibility(section.id);
+                                }}
+                                className="h-5 w-5 p-0 hover:bg-neon-purple/20"
+                                data-testid={`toggle-visibility-${section.id}`}
+                              >
+                                {visibleSections.has(section.id) ? (
+                                  <Eye className="h-2 w-2 text-neon-blue" />
+                                ) : (
+                                  <EyeOff className="h-2 w-2 text-neon-gold/50" />
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div className="text-xs text-neon-gold/70">
+                            {section.content ? (
+                              <>
+                                {section.content.split('\n')[0]}
+                                {section.content.split('\n').length > 1 && "..."}
+                                <div className="mt-1">
+                                  {getWordCount(section.content)} words • {section.content.split('\n').length} lines
+                                </div>
+                              </>
+                            ) : (
+                              <span className="italic">No lyrics yet...</span>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        )}
       </div>
 
       {/* Add New Section */}
@@ -239,19 +409,19 @@ export default function SongStructureEnhanced({
         />
         <Button
           onClick={addNewSection}
-          disabled={!newSectionName.trim()}
+          disabled={!newSectionName.trim() || createSectionMutation.isPending}
           className="w-full cyber-button text-xs"
           data-testid="button-add-section"
         >
           <Plus className="h-3 w-3 mr-1" />
-          Add Section
+          {createSectionMutation.isPending ? "Adding..." : "Add Section"}
         </Button>
       </div>
 
       <div className="mt-4 pt-3 border-t border-neon-blue/20">
         <div className="text-xs text-neon-gold/70 text-center">
           <div>Total: {sections.length} sections</div>
-          <div>Visible: {sections.filter(s => s.isVisible).length}</div>
+          <div>Visible: {sections.filter((s: Section) => visibleSections.has(s.id)).length}</div>
         </div>
       </div>
     </Card>

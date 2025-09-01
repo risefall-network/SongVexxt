@@ -132,6 +132,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.delete('/api/sections/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteSection(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting section:", error);
+      res.status(400).json({ message: "Failed to delete section" });
+    }
+  });
+
+  app.put('/api/projects/:projectId/sections/reorder', isAuthenticated, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      const { sectionOrders } = req.body; // Array of {id, order}
+      
+      if (!Array.isArray(sectionOrders)) {
+        return res.status(400).json({ message: "sectionOrders must be an array" });
+      }
+      
+      // Update all section orders in bulk
+      await Promise.all(
+        sectionOrders.map(({ id, order }) => 
+          storage.updateSection(id, { order })
+        )
+      );
+      
+      const sections = await storage.getProjectSections(projectId);
+      res.json(sections);
+    } catch (error) {
+      console.error("Error reordering sections:", error);
+      res.status(400).json({ message: "Failed to reorder sections" });
+    }
+  });
+
+  // Initialize default sections for a project
+  app.post('/api/projects/:projectId/sections/initialize', isAuthenticated, async (req: any, res) => {
+    try {
+      const { projectId } = req.params;
+      
+      const defaultSections = [
+        { projectId, type: "Verse 1", content: "", order: 1 },
+        { projectId, type: "Chorus", content: "", order: 2 },
+        { projectId, type: "Verse 2", content: "", order: 3 },
+        { projectId, type: "Bridge", content: "", order: 4 }
+      ];
+      
+      const sections = await Promise.all(
+        defaultSections.map(section => storage.createSection(section))
+      );
+      
+      res.json(sections);
+    } catch (error) {
+      console.error("Error initializing sections:", error);
+      res.status(400).json({ message: "Failed to initialize sections" });
+    }
+  });
+
   // Rhyming and dictionary routes
   app.get('/api/rhymes/:word', async (req, res) => {
     try {

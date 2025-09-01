@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
+import type { Section } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { WandSparkles, Book, Save, BarChart3, X, Share2, Search, BookOpen, Mic } from "lucide-react";
@@ -26,9 +27,10 @@ export default function ExpandedWorkspace() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [lyrics, setLyrics] = useState("I love you with all my heart\nNothing can tear us apart\nYou're my light, you're my art\nA perfect work from the start");
+  const [lyrics, setLyrics] = useState("");
   const [projectTitle, setProjectTitle] = useState("Untitled Song");
-  const [currentSection, setCurrentSection] = useState("Chorus");
+  const [currentSection, setCurrentSection] = useState("");
+  const [currentSectionId, setCurrentSectionId] = useState<string | null>(null);
   const [showDictionaryPanel, setShowDictionaryPanel] = useState(false);
   const [showAIPanel, setShowAIPanel] = useState(false);
   const [showThesaurusPanel, setShowThesaurusPanel] = useState(false);
@@ -90,6 +92,34 @@ export default function ExpandedWorkspace() {
       toast({
         title: "Error",
         description: "Failed to save project",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Update section mutation
+  const updateSectionMutation = useMutation({
+    mutationFn: async ({ id, content }: { id: string; content: string }) => {
+      return await apiRequest("PUT", `/api/sections/${id}`, { content });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projects", (activeProject as any)?.id, "sections"] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to save section",
         variant: "destructive",
       });
     },
@@ -156,6 +186,18 @@ export default function ExpandedWorkspace() {
     }
   };
 
+  const handleSectionChange = (section: Section) => {
+    setCurrentSection(section.type);
+    setCurrentSectionId(section.id);
+    setLyrics(section.content || "");
+  };
+  
+  const handleSectionContentChange = (sectionId: string, content: string) => {
+    if (sectionId === currentSectionId) {
+      setLyrics(content);
+    }
+  };
+  
   const handleSelectAISuggestion = (suggestion: string) => {
     const newLyrics = lyrics + (lyrics.endsWith('\n') ? '' : '\n') + suggestion;
     setLyrics(newLyrics);
@@ -176,6 +218,21 @@ export default function ExpandedWorkspace() {
     
     setLyrics(lines.join('\n'));
   };
+  
+  // Auto-save effect for lyrics
+  useEffect(() => {
+    if (!currentSectionId || !lyrics) return;
+    
+    const timeoutId = setTimeout(async () => {
+      try {
+        await updateSectionMutation.mutateAsync({ id: currentSectionId, content: lyrics });
+      } catch (error) {
+        console.error('Auto-save failed:', error);
+      }
+    }, 2000);
+    
+    return () => clearTimeout(timeoutId);
+  }, [lyrics, currentSectionId, updateSectionMutation]);
 
   const getLyricsStats = () => {
     const lines = lyrics.split('\n').filter(line => line.trim().length > 0);
@@ -240,8 +297,11 @@ export default function ExpandedWorkspace() {
         {!leftSidebarCollapsed && (
           <>
             <SongStructureEnhanced 
+              projectId={(activeProject as any)?.id || null}
               currentSection={currentSection}
-              onSectionChange={setCurrentSection}
+              onSectionChange={handleSectionChange}
+              onSectionContentChange={handleSectionContentChange}
+              currentLyrics={lyrics}
             />
             
             {/* AI Genre Suggestion */}
@@ -330,9 +390,10 @@ export default function ExpandedWorkspace() {
               <textarea 
                 value={lyrics}
                 onChange={(e) => setLyrics(e.target.value)}
-                placeholder="Start writing your lyrics here..."
+                placeholder={currentSection ? `Start writing lyrics for ${currentSection}...` : "Select a section to start writing..."}
                 className="w-full h-48 lg:h-64 xl:h-80 bg-cyber-purple/20 border border-neon-blue/30 rounded-xl p-3 lg:p-4 xl:p-6 text-neon-gold placeholder-neon-gold/40 focus:border-neon-blue focus:outline-none font-mono resize-y text-sm lg:text-base xl:text-lg leading-relaxed scrollbar-custom"
                 data-testid="textarea-lyrics-main"
+                disabled={!currentSectionId}
               />
 
               {/* Writing Stats */}
