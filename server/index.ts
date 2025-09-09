@@ -2,6 +2,40 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+// Environment variable validation for production deployment
+function validateEnvironmentVariables() {
+  const requiredEnvVars = [
+    'DATABASE_URL',
+    'REPLIT_DOMAINS', 
+    'SESSION_SECRET',
+    'REPL_ID'
+  ];
+
+  const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+  
+  if (missingVars.length > 0) {
+    console.error('❌ Missing required environment variables:');
+    missingVars.forEach(varName => {
+      console.error(`   - ${varName}`);
+    });
+    console.error('\nPlease add these environment variables to your deployment configuration.');
+    process.exit(1);
+  }
+
+  // Validate OpenAI API key if needed
+  if (!process.env.OPENAI_API_KEY) {
+    console.warn('⚠️  OPENAI_API_KEY not set. AI features will be disabled.');
+  }
+
+  // Validate database URL format
+  if (process.env.DATABASE_URL && !process.env.DATABASE_URL.startsWith('postgres')) {
+    console.error('❌ DATABASE_URL must be a valid PostgreSQL connection string');
+    process.exit(1);
+  }
+
+  console.log('✅ Environment variables validated successfully');
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -37,6 +71,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Validate environment variables before starting server
+  validateEnvironmentVariables();
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
