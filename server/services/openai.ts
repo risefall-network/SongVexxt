@@ -1,9 +1,13 @@
 import OpenAI from "openai";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "default_key" 
-});
+function getOpenAI(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.');
+  }
+  return new OpenAI({ apiKey });
+}
 
 export async function generateAISuggestions(lyrics: string, context?: string): Promise<{
   nextLines: string[];
@@ -35,6 +39,7 @@ Respond with JSON in this format:
 }
 `;
 
+    const openai = getOpenAI();
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -93,6 +98,7 @@ Please provide a single line that:
 Respond with only the suggested line, no additional text.
 `;
 
+    const openai = getOpenAI();
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -159,6 +165,7 @@ Respond with JSON in this format:
 }
 `;
 
+    const openai = getOpenAI();
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
