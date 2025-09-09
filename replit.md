@@ -62,3 +62,32 @@ Preferred communication style: Simple, everyday language.
 - **Replit Integration**: Custom Vite plugins for development environment enhancement and error handling
 - **TypeScript**: Full-stack type safety with path mapping and module resolution
 - **ESBuild**: Fast production bundling for server-side code compilation
+
+## Deployment Configuration
+
+### Required Environment Variables
+
+For successful deployment, the following environment variables must be configured in your deployment settings:
+
+#### Mandatory Variables
+- **DATABASE_URL**: PostgreSQL connection string (automatically provided by Replit)
+- **REPLIT_DOMAINS**: Comma-separated list of domains for OAuth (automatically provided by Replit)
+- **SESSION_SECRET**: Secure random string for session encryption (generate a strong random value)
+- **REPL_ID**: Replit application ID (automatically provided by Replit)
+
+#### Optional Variables
+- **OPENAI_API_KEY**: OpenAI API key for AI-powered songwriting features (required for AI functionality)
+- **ISSUER_URL**: OAuth issuer URL (defaults to https://replit.com/oidc if not specified)
+
+### Production Deployment Notes
+
+- The application includes comprehensive environment variable validation that runs at startup
+- Missing required variables will cause the deployment to fail with clear error messages
+- The server is configured to listen on 0.0.0.0 with proper port configuration for Replit deployments
+- Production error handling includes graceful shutdown procedures and detailed error logging
+- OpenAI features will be automatically disabled if OPENAI_API_KEY is not provided
+
+### Scripts
+- `npm run build`: Builds both frontend and backend for production
+- `npm start`: Starts the production server (used in deployment)
+- `npm run dev`: Starts development server with hot reload
