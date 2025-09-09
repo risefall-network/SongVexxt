@@ -36,6 +36,38 @@ function validateEnvironmentVariables() {
   console.log('✅ Environment variables validated successfully');
 }
 
+// Production error handling
+function setupProductionErrorHandling() {
+  // Handle uncaught exceptions
+  process.on('uncaughtException', (error) => {
+    console.error('❌ Uncaught Exception:', error);
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Shutting down due to uncaught exception...');
+      process.exit(1);
+    }
+  });
+
+  // Handle unhandled promise rejections
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Shutting down due to unhandled rejection...');
+      process.exit(1);
+    }
+  });
+
+  // Handle graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('📋 SIGTERM received, shutting down gracefully...');
+    process.exit(0);
+  });
+
+  process.on('SIGINT', () => {
+    console.log('📋 SIGINT received, shutting down gracefully...');
+    process.exit(0);
+  });
+}
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -74,14 +106,29 @@ app.use((req, res, next) => {
   // Validate environment variables before starting server
   validateEnvironmentVariables();
   
+  // Setup production error handling
+  setupProductionErrorHandling();
+  
   const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    // Log error details for debugging
+    console.error(`❌ Error ${status} at ${req.method} ${req.path}:`, {
+      message: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+      url: req.url,
+      method: req.method,
+    });
+
+    // Send appropriate error response
+    res.status(status).json({ 
+      message: process.env.NODE_ENV === 'production' 
+        ? (status === 500 ? 'Internal Server Error' : message)
+        : message
+    });
   });
 
   // importantly only setup vite in development and after
