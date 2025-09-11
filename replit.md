@@ -76,7 +76,7 @@ For successful deployment, the following environment variables must be configure
 - **REPL_ID**: Replit application ID (automatically provided by Replit)
 
 #### Optional Variables
-- **OPENAI_API_KEY**: OpenAI API key for AI-powered songwriting features (required for AI functionality)
+- **OPENROUTER_API_KEY**: OpenRouter API key for AI-powered songwriting features (required for AI functionality)
 - **ISSUER_URL**: OAuth issuer URL (defaults to https://replit.com/oidc if not specified)
 
 ### Production Deployment Notes
@@ -85,7 +85,7 @@ For successful deployment, the following environment variables must be configure
 - Missing required variables will cause the deployment to fail with clear error messages
 - The server is configured to listen on 0.0.0.0 with proper port configuration for Replit deployments
 - Production error handling includes graceful shutdown procedures and detailed error logging
-- OpenAI features will be automatically disabled if OPENAI_API_KEY is not provided
+- AI features will be automatically disabled if OPENROUTER_API_KEY is not provided
 
 ### Scripts
 - `npm run build`: Builds both frontend and backend for production

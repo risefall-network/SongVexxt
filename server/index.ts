@@ -22,9 +22,9 @@ function validateEnvironmentVariables() {
     process.exit(1);
   }
 
-  // Validate OpenAI API key if needed
-  if (!process.env.OPENAI_API_KEY) {
-    console.warn('⚠️  OPENAI_API_KEY not set. AI features will be disabled.');
+  // Validate AI API key if needed  
+  if (!process.env.OPENROUTER_API_KEY) {
+    console.warn('⚠️  OPENROUTER_API_KEY not set. AI features will be disabled.');
   }
 
   // Validate database URL format
