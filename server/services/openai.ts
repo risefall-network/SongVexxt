@@ -1,12 +1,19 @@
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+// Using OpenRouter API which provides access to various models including GPT-4o
 function getOpenAI(): OpenAI {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
-    throw new Error('OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.');
+    throw new Error('OpenRouter API key not configured. Please set OPENROUTER_API_KEY environment variable.');
   }
-  return new OpenAI({ apiKey });
+  return new OpenAI({ 
+    apiKey,
+    baseURL: "https://openrouter.ai/api/v1",
+    defaultHeaders: {
+      "HTTP-Referer": "https://songvexxt.replit.app", // Optional: for app identification
+      "X-Title": "SongVexxt AI Songwriting Assistant", // Optional: for app identification
+    }
+  });
 }
 
 export async function generateAISuggestions(lyrics: string, context?: string): Promise<{
@@ -41,7 +48,7 @@ Respond with JSON in this format:
 
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "openai/gpt-4o",
       messages: [
         {
           role: "system",
@@ -100,7 +107,7 @@ Respond with only the suggested line, no additional text.
 
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "openai/gpt-4o",
       messages: [
         {
           role: "system",
@@ -167,7 +174,7 @@ Respond with JSON in this format:
 
     const openai = getOpenAI();
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "openai/gpt-4o",
       messages: [
         {
           role: "system",
