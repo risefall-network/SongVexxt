@@ -16,8 +16,25 @@ if (!process.env.REPLIT_DOMAINS) {
 const registeredDomains = new Set<string>();
 
 /**
+ * Canonicalize a domain by extracting the base REPL name
+ * Strips known Replit suffixes like .replit.dev, .repl.co, etc.
+ */
+function canonicalizeDomain(domain: string): string {
+  const replitSuffixes = ['.replit.dev', '.repl.co', '.replit.app', '.repl.run'];
+  
+  for (const suffix of replitSuffixes) {
+    if (domain.endsWith(suffix)) {
+      return domain.slice(0, -suffix.length);
+    }
+  }
+  
+  // If no known suffix, return the part before the first dot
+  return domain.split('.')[0];
+}
+
+/**
  * Find the correct registered domain for a given hostname
- * This handles domain variations like .replit.dev vs .repl.co
+ * Uses robust canonicalization to handle .replit.dev vs .repl.co variations
  */
 function findRegisteredDomain(hostname: string): string | null {
   // First try exact match
@@ -25,18 +42,19 @@ function findRegisteredDomain(hostname: string): string | null {
     return hostname;
   }
 
-  // Extract the REPL ID part (before the first dot)
-  const hostReplId = hostname.split('.')[0];
+  // Canonicalize the incoming hostname
+  const hostBase = canonicalizeDomain(hostname);
   
-  // Look for a registered domain with the same REPL ID
+  // Look for a registered domain with the same canonical base
   for (const domain of Array.from(registeredDomains)) {
-    const domainReplId = domain.split('.')[0];
-    if (hostReplId === domainReplId) {
+    const domainBase = canonicalizeDomain(domain);
+    if (hostBase === domainBase) {
       return domain;
     }
   }
 
   // If no match found, return the first registered domain as fallback
+  console.warn(`[Auth] No matching domain found for ${hostname}, using fallback`);
   return Array.from(registeredDomains)[0] || null;
 }
 
@@ -114,20 +132,24 @@ export async function setupAuth(app: Express) {
 
   for (const domain of process.env
     .REPLIT_DOMAINS!.split(",")) {
-    // Register the domain for strategy lookup
-    registeredDomains.add(domain.trim());
+    // Ensure consistent trimming for Set, strategy name, and callbackURL
+    const trimmedDomain = domain.trim();
+    registeredDomains.add(trimmedDomain);
     
     const strategy = new Strategy(
       {
-        name: `replitauth:${domain}`,
+        name: `replitauth:${trimmedDomain}`,
         config,
         scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
+        callbackURL: `https://${trimmedDomain}/api/callback`,
       },
       verify,
     );
     passport.use(strategy);
+    console.log(`[Auth] Registered strategy: replitauth:${trimmedDomain}`);
   }
+  
+  console.log(`[Auth] Total registered domains: ${Array.from(registeredDomains).join(', ')}`);
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
@@ -157,11 +179,13 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/logout", (req, res) => {
+    const registeredDomain = findRegisteredDomain(req.hostname);
+    
     req.logout(() => {
       res.redirect(
         client.buildEndSessionUrl(config, {
           client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+          post_logout_redirect_uri: `${req.protocol}://${registeredDomain || req.hostname}`,
         }).href
       );
     });
