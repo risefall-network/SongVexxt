@@ -12,6 +12,34 @@ if (!process.env.REPLIT_DOMAINS) {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
 }
 
+// Store registered domains for strategy lookup
+const registeredDomains = new Set<string>();
+
+/**
+ * Find the correct registered domain for a given hostname
+ * This handles domain variations like .replit.dev vs .repl.co
+ */
+function findRegisteredDomain(hostname: string): string | null {
+  // First try exact match
+  if (registeredDomains.has(hostname)) {
+    return hostname;
+  }
+
+  // Extract the REPL ID part (before the first dot)
+  const hostReplId = hostname.split('.')[0];
+  
+  // Look for a registered domain with the same REPL ID
+  for (const domain of registeredDomains) {
+    const domainReplId = domain.split('.')[0];
+    if (hostReplId === domainReplId) {
+      return domain;
+    }
+  }
+
+  // If no match found, return the first registered domain as fallback
+  return Array.from(registeredDomains)[0] || null;
+}
+
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
@@ -86,6 +114,9 @@ export async function setupAuth(app: Express) {
 
   for (const domain of process.env
     .REPLIT_DOMAINS!.split(",")) {
+    // Register the domain for strategy lookup
+    registeredDomains.add(domain.trim());
+    
     const strategy = new Strategy(
       {
         name: `replitauth:${domain}`,
@@ -102,14 +133,24 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const registeredDomain = findRegisteredDomain(req.hostname);
+    if (!registeredDomain) {
+      return res.status(500).json({ error: "No registered authentication strategy found for this domain" });
+    }
+    
+    passport.authenticate(`replitauth:${registeredDomain}`, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const registeredDomain = findRegisteredDomain(req.hostname);
+    if (!registeredDomain) {
+      return res.status(500).json({ error: "No registered authentication strategy found for this domain" });
+    }
+    
+    passport.authenticate(`replitauth:${registeredDomain}`, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
     })(req, res, next);
