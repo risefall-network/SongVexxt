@@ -29,7 +29,7 @@ function findRegisteredDomain(hostname: string): string | null {
   const hostReplId = hostname.split('.')[0];
   
   // Look for a registered domain with the same REPL ID
-  for (const domain of registeredDomains) {
+  for (const domain of Array.from(registeredDomains)) {
     const domainReplId = domain.split('.')[0];
     if (hostReplId === domainReplId) {
       return domain;
