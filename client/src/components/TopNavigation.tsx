@@ -1,4 +1,4 @@
-import { Music, Expand, Combine, Settings, Eye, EyeOff } from "lucide-react";
+import { Music, Settings, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -10,14 +10,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface TopNavigationProps {
-  isExpanded: boolean;
-  onToggleMode: () => void;
   visualEffectsEnabled: boolean;
   onToggleVisualEffects: (enabled: boolean) => void;
   onOpenPreferences: () => void;
 }
 
-export default function TopNavigation({ isExpanded, onToggleMode, visualEffectsEnabled, onToggleVisualEffects, onOpenPreferences }: TopNavigationProps) {
+export default function TopNavigation({ visualEffectsEnabled, onToggleVisualEffects, onOpenPreferences }: TopNavigationProps) {
   const { user } = useAuth();
 
   return (
@@ -53,20 +51,6 @@ export default function TopNavigation({ isExpanded, onToggleMode, visualEffectsE
           </Button>
         </div>
 
-        <Button 
-          onClick={onToggleMode}
-          className="cyber-button px-4 py-2 rounded-lg text-sm font-medium"
-          data-testid="button-toggle-mode"
-        >
-          {isExpanded ? (
-            <Combine className="w-4 h-4 mr-2" />
-          ) : (
-            <Expand className="w-4 h-4 mr-2" />
-          )}
-          <span>{isExpanded ? 'Overlay Mode' : 'Expand Workspace'}</span>
-        </Button>
-
-        <div className="w-8"></div>
 
         {/* Preferences - Separated */}
         <Button

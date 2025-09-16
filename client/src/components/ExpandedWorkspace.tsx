@@ -37,6 +37,18 @@ export default function ExpandedWorkspace() {
   const [showAudioPanel, setShowAudioPanel] = useState(false);
   const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(false);
   const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false);
+  
+  // Auto-collapse sidebar on mobile by default
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobile = window.innerWidth < 768; // md breakpoint
+      setLeftSidebarCollapsed(isMobile);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   const [isAIThinking, setIsAIThinking] = useState(false);
   const [visualEffectsEnabled, setVisualEffectsEnabled] = useState(true);
   const [showPreferences, setShowPreferences] = useState(false);
@@ -250,8 +262,6 @@ export default function ExpandedWorkspace() {
     <div className="flex flex-col min-h-screen relative" data-testid="expanded-workspace">
       {/* Top Navigation */}
       <TopNavigation
-        isExpanded={true}
-        onToggleMode={() => {}}
         visualEffectsEnabled={visualEffectsEnabled}
         onToggleVisualEffects={setVisualEffectsEnabled}
         onOpenPreferences={() => setShowPreferences(true)}
@@ -268,10 +278,10 @@ export default function ExpandedWorkspace() {
       <div className={`${leftSidebarCollapsed ? 'w-12' : 'w-64 lg:w-72 xl:w-80'} transition-all duration-300 glass-effect border-r border-neon-blue/20 flex flex-col relative z-10 overflow-y-auto max-h-screen scrollbar-custom`}>
         <Button
           onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
-          className="absolute -right-3 top-4 z-20 cyber-button p-1 rounded-full w-6 h-6"
+          className="absolute -right-2 top-4 z-20 cyber-button px-3 py-2 md:px-4 md:py-3 rounded-lg text-sm font-medium min-w-[80px] md:min-w-[100px] bg-cyber-purple/30 border-neon-blue/30 hover:bg-cyber-purple/50 touch-manipulation"
           data-testid="button-toggle-left-sidebar"
         >
-          {leftSidebarCollapsed ? '>' : '<'}
+          {leftSidebarCollapsed ? 'Expand' : 'Collapse'}
         </Button>
         {!leftSidebarCollapsed && <div className="p-3 border-b border-neon-blue/20">
           <div className="flex items-center justify-between mb-2">
@@ -302,6 +312,7 @@ export default function ExpandedWorkspace() {
               onSectionChange={handleSectionChange}
               onSectionContentChange={handleSectionContentChange}
               currentLyrics={lyrics}
+              onSectionSelect={() => setLeftSidebarCollapsed(true)}
             />
             
             {/* AI Genre Suggestion */}
@@ -320,34 +331,34 @@ export default function ExpandedWorkspace() {
             <div className="flex flex-wrap items-center gap-2 xl:space-x-2">
               <Button 
                 onClick={() => setShowAIPanel(!showAIPanel)}
-                className={`cyber-button px-2 xl:px-4 py-1 xl:py-2 rounded text-xs xl:text-sm ${showAIPanel ? 'bg-neon-purple/30 border-neon-purple' : ''}`} 
+                className={`cyber-button px-3 md:px-4 xl:px-4 py-2 xl:py-2 rounded text-xs xl:text-sm min-h-[44px] touch-manipulation ${showAIPanel ? 'bg-neon-purple/30 border-neon-purple' : ''}`} 
                 data-testid="button-ai-assist-toolbar"
               >
-                <WandSparkles className="w-3 xl:w-4 h-3 xl:h-4 xl:mr-2" />
+                <WandSparkles className="w-4 xl:w-4 h-4 xl:h-4 xl:mr-2" />
                 <span className="hidden sm:inline">AI Assist</span>
               </Button>
               <Button 
                 onClick={() => setShowDictionaryPanel(!showDictionaryPanel)}
-                className={`cyber-button px-2 xl:px-4 py-1 xl:py-2 rounded text-xs xl:text-sm ${showDictionaryPanel ? 'bg-neon-blue/30 border-neon-blue' : ''}`} 
+                className={`cyber-button px-3 md:px-4 xl:px-4 py-2 xl:py-2 rounded text-xs xl:text-sm min-h-[44px] touch-manipulation ${showDictionaryPanel ? 'bg-neon-blue/30 border-neon-blue' : ''}`} 
                 data-testid="button-dictionary-toolbar"
               >
-                <Book className="w-3 xl:w-4 h-3 xl:h-4 xl:mr-2" />
+                <Book className="w-4 xl:w-4 h-4 xl:h-4 xl:mr-2" />
                 <span className="hidden sm:inline">Dictionary</span>
               </Button>
               <Button 
                 onClick={() => setShowThesaurusPanel(!showThesaurusPanel)}
-                className={`cyber-button px-2 xl:px-4 py-1 xl:py-2 rounded text-xs xl:text-sm ${showThesaurusPanel ? 'bg-neon-purple/30 border-neon-purple' : ''}`} 
+                className={`cyber-button px-3 md:px-4 xl:px-4 py-2 xl:py-2 rounded text-xs xl:text-sm min-h-[44px] touch-manipulation ${showThesaurusPanel ? 'bg-neon-purple/30 border-neon-purple' : ''}`} 
                 data-testid="button-thesaurus-toolbar"
               >
-                <BookOpen className="w-3 xl:w-4 h-3 xl:h-4 xl:mr-2" />
+                <BookOpen className="w-4 xl:w-4 h-4 xl:h-4 xl:mr-2" />
                 <span className="hidden sm:inline">Thesaurus</span>
               </Button>
               <Button 
                 onClick={() => setShowAudioPanel(!showAudioPanel)}
-                className={`cyber-button px-2 xl:px-4 py-1 xl:py-2 rounded text-xs xl:text-sm ${showAudioPanel ? 'bg-neon-cyan/30 border-neon-cyan' : ''}`} 
+                className={`cyber-button px-3 md:px-4 xl:px-4 py-2 xl:py-2 rounded text-xs xl:text-sm min-h-[44px] touch-manipulation ${showAudioPanel ? 'bg-neon-cyan/30 border-neon-cyan' : ''}`} 
                 data-testid="button-audio-toolbar"
               >
-                <Mic className="w-3 xl:w-4 h-3 xl:h-4 xl:mr-2" />
+                <Mic className="w-4 xl:w-4 h-4 xl:h-4 xl:mr-2" />
                 <span className="hidden sm:inline">Audio</span>
               </Button>
               <SocialShare 
@@ -355,8 +366,8 @@ export default function ExpandedWorkspace() {
                 songTitle={projectTitle}
                 currentSection={currentSection}
               >
-                <Button className="cyber-button px-2 xl:px-4 py-1 xl:py-2 rounded text-xs xl:text-sm">
-                  <Share2 className="w-3 xl:w-4 h-3 xl:h-4 xl:mr-2" />
+                <Button className="cyber-button px-3 md:px-4 xl:px-4 py-2 xl:py-2 rounded text-xs xl:text-sm min-h-[44px] touch-manipulation">
+                  <Share2 className="w-4 xl:w-4 h-4 xl:h-4 xl:mr-2" />
                   <span className="hidden sm:inline">Share</span>
                 </Button>
               </SocialShare>
@@ -443,10 +454,10 @@ export default function ExpandedWorkspace() {
           <div className={`${rightSidebarCollapsed ? 'w-12' : 'w-64 lg:w-72 xl:w-80'} transition-all duration-300 glass-effect border-l border-neon-blue/20 flex flex-col relative z-10 overflow-y-auto max-h-screen scrollbar-custom`}>
             <Button
               onClick={() => setRightSidebarCollapsed(!rightSidebarCollapsed)}
-              className="absolute -left-3 top-4 z-20 cyber-button p-1 rounded-full w-6 h-6"
+              className="absolute -left-2 top-4 z-20 cyber-button px-3 py-2 md:px-4 md:py-3 rounded-lg text-sm font-medium min-w-[80px] md:min-w-[100px] bg-cyber-purple/30 border-neon-blue/30 hover:bg-cyber-purple/50 touch-manipulation"
               data-testid="button-toggle-right-sidebar"
             >
-              {rightSidebarCollapsed ? '<' : '>'}
+              {rightSidebarCollapsed ? 'Expand' : 'Collapse'}
             </Button>
             {!rightSidebarCollapsed && (
               <>

@@ -28,6 +28,7 @@ interface SongStructureEnhancedProps {
   onSectionContentChange: (sectionId: string, content: string) => void;
   currentLyrics: string;
   className?: string;
+  onSectionSelect?: () => void; // New callback for auto-collapse
 }
 
 export default function SongStructureEnhanced({ 
@@ -36,7 +37,8 @@ export default function SongStructureEnhanced({
   onSectionChange,
   onSectionContentChange,
   currentLyrics,
-  className = "" 
+  className = "",
+  onSectionSelect
 }: SongStructureEnhancedProps) {
   const [showCombined, setShowCombined] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
@@ -44,7 +46,7 @@ export default function SongStructureEnhanced({
   const queryClient = useQueryClient();
   
   // Fetch sections for the current project
-  const { data: sections = [], isLoading } = useQuery({
+  const { data: sections = [], isLoading } = useQuery<Section[]>({
     queryKey: ["/api/projects", projectId, "sections"],
     enabled: !!projectId,
   });
@@ -148,6 +150,11 @@ export default function SongStructureEnhanced({
     
     // Switch to new section
     onSectionChange(section);
+    
+    // Trigger auto-collapse of left sidebar
+    if (onSectionSelect) {
+      onSectionSelect();
+    }
   };
 
   const getSectionById = (type: string) => {
@@ -212,7 +219,12 @@ export default function SongStructureEnhanced({
                             {section.type}
                           </h4>
                           <Button
-                            onClick={() => onSectionChange(section)}
+                            onClick={() => {
+                              onSectionChange(section);
+                              if (onSectionSelect) {
+                                onSectionSelect();
+                              }
+                            }}
                             className="cyber-button text-xs px-2 py-1"
                             data-testid={`edit-section-${section.id}`}
                           >
