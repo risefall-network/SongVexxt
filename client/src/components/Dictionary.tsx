@@ -7,22 +7,22 @@ import { Search } from "lucide-react";
 export default function Dictionary() {
   const [searchTerm, setSearchTerm] = useState("heart");
 
-  const { data: synonyms = [] } = useQuery({
+  const { data: synonyms = [] } = useQuery<string[]>({
     queryKey: ["/api/synonyms", searchTerm],
     enabled: !!searchTerm,
   });
 
-  const { data: rhymes = [] } = useQuery({
+  const { data: rhymes = [] } = useQuery<string[]>({
     queryKey: ["/api/rhymes", searchTerm],
     enabled: !!searchTerm,
   });
 
   // Fallback data for demo
-  const fallbackSynonyms = ["soul", "core", "essence", "spirit"];
-  const fallbackRhymes = ["start", "part", "art", "smart", "chart", "dart"];
+  const fallbackSynonyms: string[] = ["soul", "core", "essence", "spirit"];
+  const fallbackRhymes: string[] = ["start", "part", "art", "smart", "chart", "dart"];
   
-  const displaySynonyms = synonyms.length > 0 ? synonyms : fallbackSynonyms;
-  const displayRhymes = rhymes.length > 0 ? rhymes : fallbackRhymes;
+  const displaySynonyms: string[] = (synonyms && synonyms.length > 0) ? synonyms : fallbackSynonyms;
+  const displayRhymes: string[] = (rhymes && rhymes.length > 0) ? rhymes : fallbackRhymes;
 
   return (
     <div className="w-72 glass-effect border-l border-neon-blue/20 flex flex-col" data-testid="panel-dictionary">
